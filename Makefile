@@ -1,6 +1,6 @@
 CC = cl
 SRCS_DIR = srcs
-FLAGS =  /Wall #/WX
+FLAGS = /Wall /WX /wd4668 /wd5045
 
 all: svc.exe #winkey.exe
 
