@@ -1,11 +1,11 @@
-SRCS =
+
 CC = cl
 SRCS_DIR = srcs
 FLAGS =  /Wall /WX
 
 all: svc.exe winkey.exe
 
-svc.exe: $(SRCS_DIR)\test.c
+svc.exe: $(SRCS_DIR)\svc.c
 	$(CC) $(FLAGS) /Fe$@ $**
 
 winkey.exe: $(SRCDIR)\winkey.c
