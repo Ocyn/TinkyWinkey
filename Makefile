@@ -1,15 +1,14 @@
-
 CC = cl
 SRCS_DIR = srcs
-FLAGS =  /Wall /WX
+FLAGS =  /Wall #/WX
 
-all: svc.exe winkey.exe
+all: svc.exe #winkey.exe
 
-svc.exe: $(SRCS_DIR)\svc.c
-	$(CC) $(FLAGS) /Fe$@ $**
+svc.exe: $(SRCS_DIR)\test.c
+	$(CC) $(FLAGS) /Fe$@ $** user32.lib
 
-winkey.exe: $(SRCDIR)\winkey.c
-	$(CC) $(FLAGS) /Fe$@ $**
+# winkey.exe: $(SRCDIR)\winkey.c
+# 	$(CC) $(FLAGS) /Fe$@ $**
 
 clean:
 	del /Q *.obj 2>nul
@@ -17,4 +16,4 @@ clean:
 fclean: clean
 	del /Q *.exe 2>nul
 
-re: clean all
+re: fclean all
