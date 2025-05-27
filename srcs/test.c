@@ -1,6 +1,7 @@
-#include <stdio.h>
 #define _WIN32_WINNT 0x0A00
+#define WINVER 0x0A00
 #include <windows.h>
+#include <stdio.h>
 
 int main(void)
 {
@@ -14,7 +15,7 @@ int main(void)
 				if (key == VK_ESCAPE)
 					return 0;
 				printf("Key %d pressed\n", key);
-				Sleep(1000);
+				Sleep(100);
 			}
 		}
 		Sleep(10);
