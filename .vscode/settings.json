@@ -1,0 +1,15 @@
+{
+	"terminal.integrated.profiles.windows": {
+  "Dev CMD with vcvarsall": {
+    "path": "cmd.exe",
+    "args": [
+      "/k",
+      "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64"
+    ]
+  }
+},
+"terminal.integrated.defaultProfile.windows": "Dev CMD with vcvarsall",
+"files.associations": {
+  "psapi.h": "c"
+}
+}
