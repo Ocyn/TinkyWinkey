@@ -9,7 +9,7 @@
 #include <psapi.h>
 #include <stdio.h>
 
-void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook,
+void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
 	HWND hwnd, // Handle to the window that generated the event
 	LONG idObject,	 // Object identifier
@@ -23,21 +23,21 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook,
 	(void)dwEventThread;
 	if (event == EVENT_SYSTEM_FOREGROUND)
 	{
-		if (dwEventThread == 3900 || dwEventThread == 3756)
-			return;
-		char WindowName[256];
-		// GetClassNameA(hwnd, WindowName, sizeof(WindowName)); // Get the class name of the foreground window
-		if (WindowName[0] == '\0' || WindowName[1] == '\0') // If the class name is empty, get the window title
-			return;
-		GetWindowTextA(hwnd, WindowName, sizeof(WindowName)); // Get the title of the foreground window, not the process name
-		int i = 0;
-		while (WindowName[i] != '\0' && i < 256 - 1)
+		DWORD pid;
+		GetWindowThreadProcessId(hwnd, &pid); // Get the process ID of the foreground window
+
+		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid); // Open the process to query its information
+		if (hProcess)
 		{
-			if (WindowName[i] == '\n' || WindowName[i] == '\r')
-				WindowName[i] = ' ';
-			i++;
+			char processName[MAX_PATH] = "<unknown>";
+			if (GetModuleBaseNameA(hProcess, NULL, processName, sizeof(processName) / sizeof(char))) // Get the name of the process
+			{
+				if (strcmp(processName, "Explorer.EXE") == 0) // Skip if the process is Explorer.EXE, need to work on it
+					return;
+				printf("%s at %lu since the start of the computer\n", processName, dwmsEventTime);
+			}
+			CloseHandle(hProcess);
 		}
-		printf("Window : %s at %lu since the start of the computer\n", WindowName, dwmsEventTime);
 	}
 }
 
