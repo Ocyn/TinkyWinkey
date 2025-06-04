@@ -1,10 +1,10 @@
 CC = cl
 SRCS_DIR = srcs
-FLAGS = /Wall /WX /wd4668 /wd5045
+FLAGS = /Wall /WX
 
 all: svc.exe #winkey.exe
 
-svc.exe: $(SRCS_DIR)\test.c
+svc.exe: $(SRCS_DIR)\token.c
 	$(CC) $(FLAGS) /Fe$@ $** user32.lib psapi.lib
 
 # winkey.exe: $(SRCDIR)\winkey.c
