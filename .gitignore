@@ -52,5 +52,5 @@ Mkfile.old
 dkms.conf
 
 # others
-.txt
-.json
+*.txt
+*.json

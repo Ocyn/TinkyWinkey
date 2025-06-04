@@ -13,6 +13,6 @@
 int		write_to_file(char *str);
 char	*GetDateFormated(void);
 
-extern HANDLE	fd;
+	extern HANDLE	fd;
 
 #endif
