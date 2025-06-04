@@ -1,26 +1,40 @@
 #include "logs.h"
 
+HANDLE fd = NULL;
+
+int	write_to_file(char *str)
+{
+	if (fd == NULL)
+	{
+		printf("File handle is NULL\n");
+		return -1;
+	}
+	DWORD bytesWritten;
+	if (!WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL))
+	{
+		printf("Failed to write to file: %lu\n", GetLastError());
+		return -1;
+	}
+	return 0;
+}
+
 char	*GetDateFormated(void)
 {
 	LPSYSTEMTIME lpSystemTime = (LPSYSTEMTIME)malloc(sizeof(SYSTEMTIME));
 	if (lpSystemTime == NULL)
-	{
-		printf("Memory allocation failed\n");
 		return NULL;
-	}
+
 	GetLocalTime(lpSystemTime);
 	if (lpSystemTime == NULL)
-	{
-		printf("Failed to get local time: %lu\n", GetLastError());
 		return NULL;
-	}
+
 	char *dateStr = (char *)malloc(22);
 	if (dateStr == NULL)
 	{
-		printf("Memory allocation failed\n");
 		free(lpSystemTime);
 		return NULL;
 	}
+
 	sprintf_s(dateStr, 22, "%d.%d.%d %d:%d:%d",
 		lpSystemTime->wDay, lpSystemTime->wMonth, lpSystemTime->wYear,
 		lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond);
@@ -50,10 +64,7 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 
 		char *dateStr = GetDateFormated();
 		if (dateStr == NULL)
-		{
-			printf("Failed to get date string\n");
 			return;
-		}
 
 		int i = 0;
 		while (windowTitle[i] != '\0' && i < 256 - 1)
@@ -63,13 +74,21 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 			i++;
 		}
 		windowTitle[i] = '\0';
-		printf("[%s] - Foreground window title: %s\n", dateStr, windowTitle);
+		char logEntry[512];
+		sprintf_s(logEntry, sizeof(logEntry), "[%s] - Foreground window title: %s\n", dateStr, windowTitle);
+		write_to_file(logEntry);
 		free(dateStr);
 	}
 }
 
 int	main(void)
 {
+	fd = CreateFileA("logs.txt", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (fd == INVALID_HANDLE_VALUE)
+		return 1;
+
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
 		NULL,

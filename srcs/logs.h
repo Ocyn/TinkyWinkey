@@ -7,6 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <io.h>
+#include <fileapi.h>
+
+int		write_to_file(char *str);
 char	*GetDateFormated(void);
+
+extern HANDLE	fd;
 
 #endif
