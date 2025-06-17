@@ -38,24 +38,35 @@ char	*GetDateFormated(void)
 
 void get_foreground_window(HWND hwnd)
 {
-	char windowTitle[256];
-		if (GetWindowTextA(hwnd, windowTitle, sizeof(windowTitle)) == 0)
-			return;
+	wchar_t windowTitleW[256];
+	if (GetWindowTextW(hwnd, windowTitleW, sizeof(windowTitleW) / sizeof(wchar_t)) == 0)
+		return;
 
 	char *dateStr = GetDateFormated();
 	if (dateStr == NULL)
 		return;
 
 	int i = 0;
-	while (windowTitle[i] != '\0' && i < 256 - 1)
+	while (windowTitleW[i] != '\0' && i < 256 - 1)
 	{
-		if (windowTitle[i] == '\r' || windowTitle[i] == '\n')
-			windowTitle[i] = ' ';
+		if (windowTitleW[i] == '\r' || windowTitleW[i] == '\n')
+			windowTitleW[i] = ' ';
 		i++;
 	}
-	windowTitle[i] = '\0';
-	char logEntry[512];
-	sprintf_s(logEntry, sizeof(logEntry), "[%s] - Foreground window title: %s\n", dateStr, windowTitle);
+	windowTitleW[i] = '\0';
+
+	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, NULL, 0, NULL, NULL);
+	char *windowTitleUtf8 = (char *)malloc(utf8Len);
+	if (!windowTitleUtf8) {
+		free(dateStr);
+		return;
+	}
+	WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, windowTitleUtf8, utf8Len, NULL, NULL);
+
+	char logEntry[1024];
+	snprintf(logEntry, sizeof(logEntry), "[%s] - Foreground window title: %s\n", dateStr, windowTitleUtf8);
 	write_to_file(logEntry);
+
+	free(windowTitleUtf8);
 	free(dateStr);
 }

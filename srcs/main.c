@@ -22,7 +22,7 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 
 int	main(void)
 {
-	fd = CreateFileA("logs.txt", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+	fd = CreateFileW(L"logs.txt", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (fd != INVALID_HANDLE_VALUE)
