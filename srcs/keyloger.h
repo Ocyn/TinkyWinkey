@@ -23,4 +23,12 @@ typedef struct s_key {
 int	    handleKeyPress(t_key *keyData);
 void	initKeylogger(t_key *keyData);
 
+void CALLBACK WinEvent(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
+	DWORD event, // Event type
+	HWND hwnd, // Handle to the window that generated the event
+	LONG idObject,	 // Object identifier
+	LONG idChild, // Child identifier
+	DWORD dwEventThread, // Thread identifier of the thread that generated the event
+	DWORD dwmsEventTime); // Time of the event in milliseconds since the system started
+
 #endif

