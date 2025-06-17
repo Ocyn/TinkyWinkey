@@ -1,21 +1,15 @@
 #include "logs.h"
 
-HANDLE fd = NULL;
-
-int	write_to_file(char *str)
+void	write_to_file(char *str)
 {
 	if (fd == NULL)
 	{
 		printf("File handle is NULL\n");
-		return -1;
+		return ;
 	}
 	DWORD bytesWritten;
 	if (!WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL))
-	{
 		printf("Failed to write to file: %lu\n", GetLastError());
-		return -1;
-	}
-	return 0;
 }
 
 char	*GetDateFormated(void)

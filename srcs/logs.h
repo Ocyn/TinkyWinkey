@@ -10,7 +10,7 @@
 #include <io.h>
 #include <fileapi.h>
 
-int		write_to_file(char *str);
+void		write_to_file(char *str);
 char	*GetDateFormated(void);
 
 // Function to get the foreground window title and log it

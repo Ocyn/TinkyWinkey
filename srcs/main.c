@@ -1,5 +1,7 @@
 #include "logs.h"
 
+HANDLE fd = NULL;
+
 void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
 	HWND hwnd, // Handle to the window that generated the event
@@ -17,7 +19,6 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 	if (event == EVENT_SYSTEM_FOREGROUND)
 		get_foreground_window(hwnd);
 }
-
 
 int	main(void)
 {
