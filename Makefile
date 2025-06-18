@@ -1,10 +1,12 @@
 CC = cl
 SRCS_DIR = srcs
-FLAGS = /Wall /WX
+FLAGS = /Wall  #/WX
+SRCS = main.c \
+	   logs.c
 
 all: svc.exe #winkey.exe
 
-svc.exe: $(SRCS_DIR)\logs.c
+svc.exe: $(SRCS_DIR)/main.c $(SRCS_DIR)/logs.c
 	$(CC) $(FLAGS) /Fe$@ $** user32.lib psapi.lib
 
 # winkey.exe: $(SRCDIR)\winkey.c
