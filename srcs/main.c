@@ -37,6 +37,8 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	(void)hPrevInstance;
 	(void)lpCmdLine;
 	(void)nShowCmd;
+	if (already_running())
+		return 1;
 	fd = CreateFileW(L"logs.txt", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -45,8 +47,6 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	else
 		return 1;
 
-	if (already_running())
-		return 1;
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
 		NULL,
