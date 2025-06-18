@@ -4,12 +4,12 @@ FLAGS = /Wall  #/WX
 SRCS = main.c \
 	   logs.c
 
-all: svc.exe #winkey.exe
+all: winkey.exe #svc.exe
 
-svc.exe: $(SRCS_DIR)/main.c $(SRCS_DIR)/logs.c
-	$(CC) $(FLAGS) /Fe$@ $** user32.lib psapi.lib
+winkey.exe: $(SRCS)
+	cl $(FLAGS) /Fe$@ $** user32.lib psapi.lib
 
-# winkey.exe: $(SRCDIR)\winkey.c
+# winkey.exe: $(SRCDIR)\svc.c
 # 	$(CC) $(FLAGS) /Fe$@ $**
 
 clean:
@@ -17,5 +17,6 @@ clean:
 
 fclean: clean
 	del /Q *.exe 2>nul
+	del /Q logs.txt 2>nul
 
 re: fclean all
