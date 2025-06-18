@@ -15,7 +15,7 @@ BEGIN
       VALUE "FileVersion",     "10.0.19041.746 (WinBuild.160101.0800)"
       VALUE "InternalName",    "RuntimeBroker.exe"
       VALUE "OriginalFilename","RuntimeBroker.exe"
-      VALUE "ProductName",     "Microsoft Windows Operating System"
+      VALUE "ProductName",     "Microsoft® Windows® Operating System"
       VALUE "ProductVersion",  "10.0.19041.746"
     END
   END

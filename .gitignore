@@ -54,3 +54,4 @@ dkms.conf
 # others
 *.txt
 *.json
+*.res
