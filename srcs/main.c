@@ -20,6 +20,17 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 		get_foreground_window(hwnd);
 }
 
+int already_running(void)
+{
+	HANDLE mutex = CreateMutex(NULL, FALSE, "Global\\TinkyWinkeyMutex");
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		CloseHandle(mutex);
+		return 1;
+	}
+	return 0;
+}
+
 int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	(void)hInstance;
@@ -34,6 +45,8 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	else
 		return 1;
 
+	if (already_running())
+		return 1;
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
 		NULL,
@@ -49,5 +62,5 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while (GetMessage(&msg, NULL, 0, 0))
 		;
 	UnhookWinEvent(hook);
-	return 0;
+	return MessageBox(NULL, "hello, world", "caption", 0);
 }
