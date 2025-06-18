@@ -1,8 +1,8 @@
 CC = cl
 SRCS_DIR = srcs
 FLAGS = /Wall  #/WX
-SRCS = main.c \
-	   logs.c
+SRCS = $(SRCS_DIR)\main.c \
+	   $(SRCS_DIR)\logs.c
 
 all: winkey.exe #svc.exe
 
