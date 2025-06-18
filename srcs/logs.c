@@ -64,7 +64,7 @@ void get_foreground_window(HWND hwnd)
 	WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, windowTitleUtf8, utf8Len, NULL, NULL);
 
 	char logEntry[1024];
-	snprintf(logEntry, sizeof(logEntry), "[%s] - Foreground window title: %s\n", dateStr, windowTitleUtf8);
+	snprintf(logEntry, sizeof(logEntry), "\n[%s] - Foreground window title: %s\n", dateStr, windowTitleUtf8);
 	write_to_file(logEntry);
 
 	free(windowTitleUtf8);
