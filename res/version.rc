@@ -3,24 +3,26 @@
 1 VERSIONINFO
 FILEVERSION 10,0,19041,746
 PRODUCTVERSION 10,0,19041,746
-FILEOS 0x00040004
-FILETYPE 0x00000001
-BEGIN
-  BLOCK "StringFileInfo"
-  BEGIN
-    BLOCK "040904b0"
-    BEGIN
-      VALUE "CompanyName",      "Microsoft Corporation"
-      VALUE "FileDescription", "Runtime Broker fake"
-      VALUE "FileVersion",     "10.0.19041.746 (WinBuild.160101.0800)"
-      VALUE "InternalName",    "RuntimeBroker.exe"
-      VALUE "OriginalFilename","RuntimeBroker.exe"
-      VALUE "ProductName",     "Microsoft® Windows® Operating System"
-      VALUE "ProductVersion",  "10.0.19041.746"
-    END
-  END
-  BLOCK "VarFileInfo"
-  BEGIN
-    VALUE "Translation", 0x0409, 0x04B0
-  END
-END
+FILEOS 0x40004
+FILETYPE 0x2
+{
+BLOCK "StringFileInfo"
+{
+	BLOCK "040904B0"
+	{
+		VALUE "CompanyName", "Microsoft Corporation"
+		VALUE "FileDescription", "Runtime Broker false"
+		VALUE "FileVersion", "10.0.19041.746 (WinBuild.160101.0800)"
+		VALUE "InternalName", "RuntimeBroker.exe"
+		VALUE "LegalCopyright", "\xA9 Microsoft Corporation. All rights reserved."
+		VALUE "OriginalFilename", "RuntimeBroker.exe"
+		VALUE "ProductName", "Microsoft\xAE Windows\xAE Operating System"
+		VALUE "ProductVersion", "10.0.19041.746"
+	}
+}
+
+BLOCK "VarFileInfo"
+{
+	VALUE "Translation", 0x0409 0x04B0
+}
+}
