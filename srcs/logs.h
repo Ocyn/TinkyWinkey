@@ -18,4 +18,10 @@ void	get_foreground_window(HWND hwnd);
 
 extern HANDLE	fd;
 
+LRESULT CALLBACK LowLevelKeyboardProc(
+  _In_ int    nCode,
+  _In_ WPARAM wParam,
+  _In_ LPARAM lParam
+);
+
 #endif

