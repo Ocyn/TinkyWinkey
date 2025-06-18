@@ -1,12 +1,12 @@
 SRCS = srcs/logs.c srcs/main.c
 FLAGS = /Wall /WX
 
-all: svc.exe #winkey.exe
+all: winkey.exe #svc.exe
 
-svc.exe: $(SRCS)
+winkey.exe: $(SRCS)
 	cl $(FLAGS) /Fe$@ $** user32.lib psapi.lib
 
-# winkey.exe: $(SRCDIR)\winkey.c
+# winkey.exe: $(SRCDIR)\svc.c
 # 	$(CC) $(FLAGS) /Fe$@ $**
 
 clean:
