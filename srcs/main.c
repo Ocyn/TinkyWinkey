@@ -54,10 +54,7 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		0, 0,
 		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
 	if (hook == NULL)
-	{
-		printf("Failed to set hook: %lu\n", GetLastError());
 		return 1;
-	}
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 		;

@@ -3,13 +3,9 @@
 void	write_to_file(char *str)
 {
 	if (fd == NULL)
-	{
-		printf("File handle is NULL\n");
 		return ;
-	}
 	DWORD bytesWritten;
-	if (!WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL))
-		printf("Failed to write to file: %lu\n", GetLastError());
+	WriteFile(fd, str, (DWORD)strlen(str), &bytesWritten, NULL);
 }
 
 char	*GetDateFormated(void)
