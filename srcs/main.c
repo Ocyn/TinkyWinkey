@@ -62,7 +62,6 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		SetFilePointer(fd, 0, NULL, FILE_END);
 	else
 		return 1;
-
 	if (already_running())
 		return 1;
 	HWINEVENTHOOK hook = SetWinEventHook(
@@ -72,19 +71,20 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		0, 0,
 		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
 	if (hook == NULL)
-	{
-		printf("Failed to set hook: %lu\n", GetLastError());
-		return 1;
-	}
-	HHOOK hookKB = SetWindowsHookExW(
+		return errorReturn("Failed to set WinForeground hook");
+	HHOOK hKeyboardHook = SetWindowsHookExW(
 		WH_KEYBOARD_LL, LowLevelKeyboardProc, NULL, 0
 	);
-	if (hookKB == NULL)
+	if (hKeyboardHook == NULL)
 		return errorReturn("Failed to set hook Keyboard");
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
-		;
+	{
+		TranslateMessage(&msg);
+        DispatchMessage(&msg);
+	}
 	UnhookWinEvent(hook);
+	UnhookWindowsHookEx(hKeyboardHook);
 	return MessageBox(NULL, "hello, world", "caption", 0);
 }
