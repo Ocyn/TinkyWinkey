@@ -6,5 +6,6 @@
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
+#include <stdio.h>
 
 #endif
