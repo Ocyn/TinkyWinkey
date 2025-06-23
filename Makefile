@@ -1,4 +1,4 @@
-SRCS = keylog/logs.c keylog/main.c
+SRCS = keylog/logs.c keylog/main.c keylog/getter.c
 FLAGS = /Wall /WX
 RC_FILE = res\version.rc
 RES_FILE = res\version.res
