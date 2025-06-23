@@ -26,6 +26,7 @@ typedef struct s_key {
 int		handleKeyPress(t_key *keyData);
 void	initKeylogger(t_key *keyData);
 
+void get_cpu_info(void);
 void get_windows_info(void);
 
 
