@@ -3,7 +3,7 @@ FLAGS = /Wall /WX
 RC_FILE = res\version.rc
 RES_FILE = res\version.res
 
-all: $(RES_FILE) winkey.exe #svc.exe
+all: $(RES_FILE) winkey.exe svc.exe
 
 $(RES_FILE): $(RC_FILE)
 	rc /fo $(RES_FILE) $(RC_FILE)
@@ -11,8 +11,8 @@ $(RES_FILE): $(RC_FILE)
 winkey.exe: $(SRCS)
 	cl $(FLAGS) /Fe$@ $** $(RES_FILE) user32.lib psapi.lib
 
-# winkey.exe: $(SRCDIR)\svc.c
-# 	$(CC) $(FLAGS) /Fe$@ $**
+svc.exe: service\svc.cpp
+	$(CC) $(FLAGS) /Fe$@ $**
 
 clean:
 	del /Q *.obj 2>nul
