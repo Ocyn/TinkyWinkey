@@ -155,31 +155,43 @@ int DeleteService()
 }
 
 
+// ServiceMain: Entry point for the service.
+// Parameters:
+//   argc  - Number of command line arguments.
+//   argv  - Array of command line arguments.
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
 {
-	UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
     g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceCtrlHandler);
     if (g_StatusHandle == NULL)
+    {
+        _tprintf(_T("RegisterServiceCtrlHandler failed (%lu)\n"), GetLastError());
         return;
+    }
 
     ZeroMemory(&g_ServiceStatus, sizeof(g_ServiceStatus));
     g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
     g_ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
     g_ServiceStatus.dwWin32ExitCode = 0;
-    g_ServiceStatus.dwServiceSpecificExitCode = 0;
-    g_ServiceStatus.dwCheckPoint = 0;
-
     if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+    {
+        _tprintf(_T("SetServiceStatus failed (%lu)\n"), GetLastError());
+        if (g_ServiceStopEvent)
+            CloseHandle(g_ServiceStopEvent);
+        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
         return;
+    }
 
     g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (g_ServiceStopEvent == NULL)
     {
+        DWORD dwError = GetLastError();
+        _tprintf(_T("CreateEvent failed (%lu)\n"), dwError);
         g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-        g_ServiceStatus.dwWin32ExitCode = GetLastError();
+        g_ServiceStatus.dwWin32ExitCode = dwError;
         g_ServiceStatus.dwCheckPoint = 1;
         SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
         return;
@@ -190,7 +202,13 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     g_ServiceStatus.dwCheckPoint = 0;
 
     if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+    {
+        _tprintf(_T("SetServiceStatus (SERVICE_RUNNING) failed (%lu)\n"), GetLastError());
+        if (g_ServiceStopEvent)
+            CloseHandle(g_ServiceStopEvent);
+        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
         return;
+    }
 
     HANDLE hThread = CreateThread(NULL, 0, ServiceWorkerThread, NULL, 0, NULL);
     if (hThread != NULL)
@@ -198,8 +216,14 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
         WaitForSingleObject(hThread, INFINITE);
         CloseHandle(hThread);
     }
+    else
+    {
+        _tprintf(_T("CreateThread failed (%lu)\n"), GetLastError());
+        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+    }
 
-    CloseHandle(g_ServiceStopEvent);
+    if (g_ServiceStopEvent != NULL)
+        CloseHandle(g_ServiceStopEvent);
 
     g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
     g_ServiceStatus.dwWin32ExitCode = 0;
