@@ -1,6 +1,6 @@
 # TinkyWinkey
 ### Yet Another Windows 10 keylogger
-<img src="./readme_utils/banner.jpg" alt="Title banner" width="1024"/>
+<img src=".readme_utils\banner.jpg" alt="Title banner" width="1024"/>
 
 ## Table of Contents
 1. Introduction
