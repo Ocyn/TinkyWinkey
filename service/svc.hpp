@@ -12,8 +12,8 @@
 #include <wtsapi32.h>
 #include <tchar.h>
 #include <strsafe.h>
+#include <tlhelp32.h>
 #pragma warning(pop)
-
 #include <stdio.h>
 
 #pragma comment(lib, "Advapi32.lib")
