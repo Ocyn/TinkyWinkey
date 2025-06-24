@@ -30,8 +30,6 @@ void	get_cpu_info(void);
 void	get_windows_info(void);
 void	get_ram_info(void);
 
-DWORD FindTargetPID(const wchar_t* targetName);
-
 
 int		already_running(void);
 
