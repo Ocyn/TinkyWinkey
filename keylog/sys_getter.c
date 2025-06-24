@@ -5,6 +5,7 @@ void	get_ip_address(void)
 	WSADATA wsaData;
 	char hostname[256];
 
+	// Initialize Winsock
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 		return;
 
@@ -14,6 +15,7 @@ void	get_ip_address(void)
 		return;
 	}
 
+	// Get the IP address of the local machine
 	struct addrinfo hints, *res = NULL;
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -26,10 +28,12 @@ void	get_ip_address(void)
 		return;
 	}
 
+	// Convert the IP address to a string
 	char ipstr[INET_ADDRSTRLEN] = {0};
 
 	struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
 
+	// Convert the IPv4 address to a string
 	if (InetNtop(AF_INET, &(ipv4->sin_addr), ipstr, sizeof(ipstr)) != NULL)
 	{
 		char message[256];
@@ -43,6 +47,7 @@ void	get_ip_address(void)
 
 const char* get_arch_name(WORD arch)
 {
+	// Return the architecture name based on the processor architecture by using windows defines
 	switch (arch)
 	{
 		case PROCESSOR_ARCHITECTURE_INTEL:			return "Intel (x86)";
@@ -67,9 +72,11 @@ const char* get_arch_name(WORD arch)
 
 void get_cpu_info(void)
 {
+	// Get CPU vendor and model information using __cpuid intrinsic
 	int cpuInfoData[4] = {0};
 	char vendor[13] = {0};
 
+	// Get the CPU vendor string
 	__cpuid(cpuInfoData, 0);
 	*((int*)vendor) = cpuInfoData[1];
 	*((int*)(vendor + 4)) = cpuInfoData[3];
@@ -80,6 +87,7 @@ void get_cpu_info(void)
 	int modelData[4] = {0};
 	char brand[49] = {0};
 
+	// Get the CPU brand string
 	__cpuid(modelData, 0x80000002);
 	memcpy(brand, modelData, 16);
 
@@ -93,10 +101,11 @@ void get_cpu_info(void)
 	snprintf(modelInfo, sizeof(modelInfo), "CPU Vendor: %s\nCPU Model: %s\n", vendor, brand);
 	write_to_file(modelInfo);
 
+	// Get CPU information using  Arch and number of processors
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	char cpuInfo[256];
-	snprintf(cpuInfo, sizeof(cpuInfo), "CPU Architecture: %s\nNombre de processeurs: %lu\n",
+	snprintf(cpuInfo, sizeof(cpuInfo), "CPU Architecture: %s\nNombre de coeur: %lu\n",
 				 get_arch_name(sysInfo.wProcessorArchitecture),
 				(unsigned long)sysInfo.dwNumberOfProcessors);
 	write_to_file(cpuInfo);
@@ -104,12 +113,15 @@ void get_cpu_info(void)
 
 void get_windows_info(void)
 {
+	// Define the structure for RtlGetVersion
 	HMODULE hMod = GetModuleHandleA("ntdll.dll");
 	if (hMod)
 	{
+		// Define the function pointer type for RtlGetVersion
 		void* pFn = (void*)GetProcAddress(hMod, "RtlGetVersion");
 		if (pFn)
 		{
+			// Cast the function pointer to the correct type
 			RtlGetVersionPtr fn = (RtlGetVersionPtr)pFn;
 			RTL_OSVERSIONINFOW rovi;
 			ZeroMemory(&rovi, sizeof(rovi));
@@ -130,6 +142,7 @@ void get_windows_info(void)
 
 void get_ram_info(void)
 {
+	// Get the total physical memory using GlobalMemoryStatusEx
 	MEMORYSTATUSEX status;
 	status.dwLength = sizeof(status);
 	GlobalMemoryStatusEx(&status);

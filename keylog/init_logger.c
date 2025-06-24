@@ -2,19 +2,6 @@
 
 HANDLE fd = NULL;
 
-int	initfd(char *fileName)
-{
-	fd = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-	if (fd != INVALID_HANDLE_VALUE)
-		SetFilePointer(fd, 0, NULL, FILE_END);
-	else
-		return EXIT_FAILURE;
-
-	return EXIT_SUCCESS;
-}
-
 void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event hook
 	DWORD event, // Event type
 	HWND hwnd, // Handle to the window that generated the event

