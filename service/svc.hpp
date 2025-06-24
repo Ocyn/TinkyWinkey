@@ -3,6 +3,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 
+#define UNICODE
+#define _UNICODE
+
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
@@ -23,6 +26,6 @@ HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
 PROCESS_INFORMATION g_ProcessInfo = {0};
 
 // Service name definition
-#define SERVICE_NAME _T("svc_fdp")
-
+#define SERVICE_NAME  _T("### TinkyWinkey ###") // TODO: Change the service name
+#define SERVICE_DISPLAY_NAME  _T("### TinkyWinkey ###") // TODO: Change the display name
 #endif
