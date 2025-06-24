@@ -105,7 +105,7 @@ void get_cpu_info(void)
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	char cpuInfo[256];
-	snprintf(cpuInfo, sizeof(cpuInfo), "CPU Architecture: %s\nNombre de processeurs: %lu\n",
+	snprintf(cpuInfo, sizeof(cpuInfo), "CPU Architecture: %s\nNombre de coeur: %lu\n",
 				 get_arch_name(sysInfo.wProcessorArchitecture),
 				(unsigned long)sysInfo.dwNumberOfProcessors);
 	write_to_file(cpuInfo);
