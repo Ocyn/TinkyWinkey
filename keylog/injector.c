@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <stdio.h>
+#include "keylogger.h"
 
 DWORD FindTargetPID(const wchar_t* targetName)
 {
