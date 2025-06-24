@@ -2,18 +2,19 @@
 
 #pragma comment(lib, "Advapi32.lib")
 
-// Variables globales pour le service
+
+// Global variables for service control
 SERVICE_STATUS g_ServiceStatus = {0};
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
 HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
 PROCESS_INFORMATION g_ProcessInfo = {0};
 
-// Nom du service
+// Service name definition
 #define SERVICE_NAME _T("svc_fdp")
 
 
 
-// Fonction principale du service
+// Main service function
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv);
 VOID WINAPI ServiceCtrlHandler(DWORD);
 DWORD WINAPI ServiceWorkerThread(LPVOID lpParam);
@@ -73,18 +74,13 @@ int StartService()
     SC_HANDLE schService;
 
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-    // schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
     if (schSCManager == NULL)
     {
         DWORD error = GetLastError();
         if (error == ERROR_ACCESS_DENIED)
-        {
             _tprintf(_T("Access denied. Please run as administrator.\n"));
-        }
         else
-        {
             _tprintf(_T("OpenSCManager failed (%lu)\n"), error);
-        }
         return 0;
     }
 
@@ -100,9 +96,7 @@ int StartService()
     {
         DWORD error = GetLastError();
         if (error == ERROR_SERVICE_ALREADY_RUNNING)
-        {
             _tprintf(_T("Service is already running\n"));
-        }
         else
         {
             _tprintf(_T("StartService failed (%lu)\n"), error);
@@ -112,9 +106,7 @@ int StartService()
         }
     }
     else
-    {
         _tprintf(_T("Service start pending...\n"));
-    }
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
@@ -143,13 +135,9 @@ int StopService()
     }
 
     if (!ControlService(schService, SERVICE_CONTROL_STOP, &ssStatus))
-    {
         _tprintf(_T("ControlService failed (%lu)\n"), GetLastError());
-    }
     else
-    {
         _tprintf(_T("Service stopped successfully\n"));
-    }
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
@@ -177,13 +165,9 @@ int DeleteService()
     }
 
     if (!DeleteService(schService))
-    {
         _tprintf(_T("DeleteService failed (%lu)\n"), GetLastError());
-    }
     else
-    {
         _tprintf(_T("Service deleted successfully\n"));
-    }
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
@@ -193,16 +177,12 @@ int DeleteService()
 
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
 {
-    // DWORD Status = E_FAIL;
-
 	UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
     g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceCtrlHandler);
     if (g_StatusHandle == NULL)
-    {
         return;
-    }
 
     ZeroMemory(&g_ServiceStatus, sizeof(g_ServiceStatus));
     g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
@@ -213,9 +193,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     g_ServiceStatus.dwCheckPoint = 0;
 
     if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
-    {
         return;
-    }
 
     g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (g_ServiceStopEvent == NULL)
@@ -232,9 +210,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     g_ServiceStatus.dwCheckPoint = 0;
 
     if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
-    {
         return;
-    }
 
     HANDLE hThread = CreateThread(NULL, 0, ServiceWorkerThread, NULL, 0, NULL);
     if (hThread != NULL)
