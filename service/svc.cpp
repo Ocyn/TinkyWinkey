@@ -9,7 +9,7 @@ HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
 PROCESS_INFORMATION g_ProcessInfo = {0};
 
 // Nom du service
-#define SERVICE_NAME _T("svc")
+#define SERVICE_NAME _T("svc_fdp")
 
 
 
@@ -69,17 +69,55 @@ int InstallService()
 
 int StartService()
 {
-	  SERVICE_TABLE_ENTRY ServiceTable[] =
-    {
-        {SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION) ServiceMain},
-        {NULL, NULL}
-    };
+    SC_HANDLE schSCManager;
+    SC_HANDLE schService;
 
-    if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
+    schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    // schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
+    if (schSCManager == NULL)
     {
-        _tprintf(_T("StartServiceCtrlDispatcher failed (%lu)\n"), GetLastError());
+        DWORD error = GetLastError();
+        if (error == ERROR_ACCESS_DENIED)
+        {
+            _tprintf(_T("Access denied. Please run as administrator.\n"));
+        }
+        else
+        {
+            _tprintf(_T("OpenSCManager failed (%lu)\n"), error);
+        }
         return 0;
     }
+
+    schService = OpenService(schSCManager, SERVICE_NAME, SERVICE_START);
+    if (schService == NULL)
+    {
+        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
+        CloseServiceHandle(schSCManager);
+        return 0;
+    }
+
+    if (!StartService(schService, 0, NULL))
+    {
+        DWORD error = GetLastError();
+        if (error == ERROR_SERVICE_ALREADY_RUNNING)
+        {
+            _tprintf(_T("Service is already running\n"));
+        }
+        else
+        {
+            _tprintf(_T("StartService failed (%lu)\n"), error);
+            CloseServiceHandle(schService);
+            CloseServiceHandle(schSCManager);
+            return 0;
+        }
+    }
+    else
+    {
+        _tprintf(_T("Service start pending...\n"));
+    }
+
+    CloseServiceHandle(schService);
+    CloseServiceHandle(schSCManager);
     return 1;
 }
 
@@ -120,7 +158,7 @@ int StopService()
 
 int DeleteService()
 {
-	 SC_HANDLE schSCManager;
+	SC_HANDLE schSCManager;
     SC_HANDLE schService;
 
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
