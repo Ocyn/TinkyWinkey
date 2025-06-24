@@ -40,7 +40,7 @@ The Tinky service (service/svc.cpp) is a Windows service that provides the follo
 - **Service Management**: Install, start, stop, and delete the service
 - **Process Management**: Launches and manages the `winkey.exe` keylogger process
 - **Session Management**: Uses Windows Terminal Services to run the keylogger in the active user session
-- **Service Name**: "### Tinky ###" (configurable in service/svc.hpp)
+- **Service Name**: "Tinky" (configurable in service/svc.hpp)
 
 ### Key Components
 - `InstallService()`: Creates and registers the service with the SCM
