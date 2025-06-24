@@ -134,7 +134,7 @@ nmake fclean
 
 2. **Verify the service is running**:
    ```cmd
-   sc query "### Tinky ###"
+   sc query "Tinky"
    ```
 
 3. **Check if keylogger is active**:
