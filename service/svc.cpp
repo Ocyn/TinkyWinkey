@@ -307,13 +307,32 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     return ERROR_SUCCESS;
 }
 
-int _tmain(int arc, TCHAR *argv[])
+int _tmain(int argc, TCHAR *argv[])
 {
-	if (arc < 2)
-	{
-		_tprintf(_T("Usage: %s <options>"), argv[0]);
-		return 1;
-	}
+    // Si aucun argument, c'est le SCM qui lance le service
+    if (argc == 1)
+    {
+        // Point d'entrée du service - appelé par le SCM
+        SERVICE_TABLE_ENTRY ServiceTable[] = 
+        {
+            { SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain },
+            { NULL, NULL }
+        };
+
+        if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
+        {
+            _tprintf(_T("StartServiceCtrlDispatcher failed (%lu)\n"), GetLastError());
+            return 1;
+        }
+        return 0;
+    }
+
+    if (argc < 2)
+    {
+        _tprintf(_T("Usage: %s <options>\n"), argv[0]);
+        return 1;
+    }
+    
 	if (_tcscmp(argv[1], _T("install")) == 0)
 	{
 		_tprintf(_T("Installing service...\n"));
