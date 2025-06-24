@@ -67,6 +67,32 @@ const char* get_arch_name(WORD arch)
 
 void get_cpu_info(void)
 {
+	int cpuInfoData[4] = {0};
+	char vendor[13] = {0};
+
+	__cpuid(cpuInfoData, 0);
+	*((int*)vendor) = cpuInfoData[1];
+	*((int*)(vendor + 4)) = cpuInfoData[3];
+	*((int*)(vendor + 8)) = cpuInfoData[2];
+
+	char modelInfo[256] = {0};
+
+	int modelData[4] = {0};
+	char brand[49] = {0};
+
+	__cpuid(modelData, 0x80000002);
+	memcpy(brand, modelData, 16);
+
+	__cpuid(modelData, 0x80000003);
+	memcpy(brand + 16, modelData, 16);
+
+	__cpuid(modelData, 0x80000004);
+	memcpy(brand + 32, modelData, 16);
+	brand[48] = '\0';
+
+	snprintf(modelInfo, sizeof(modelInfo), "CPU Vendor: %s\nCPU Model: %s\n", vendor, brand);
+	write_to_file(modelInfo);
+
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	char cpuInfo[256];
@@ -100,4 +126,14 @@ void get_windows_info(void)
 		}
 	}
 	write_to_file("Impossible de récupérer la version de Windows\n");
+}
+
+void get_ram_info(void)
+{
+	MEMORYSTATUSEX status;
+	status.dwLength = sizeof(status);
+	GlobalMemoryStatusEx(&status);
+	char ramInfo[256];
+	snprintf(ramInfo, sizeof(ramInfo), "RAM: %llu MB\n", status.ullTotalPhys / (1024 * 1024));
+	write_to_file(ramInfo);
 }
