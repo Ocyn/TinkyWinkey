@@ -1,5 +1,6 @@
 #include "svc.hpp"
 
+
 int InstallService()
 {
 	
@@ -267,6 +268,19 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     STARTUPINFO si;
     TCHAR szPath[MAX_PATH];
     TCHAR szDir[MAX_PATH];
+    DWORD sessionId = WTSGetActiveConsoleSessionId();
+    if (sessionId == 0xFFFFFFFF)
+    {
+        _tprintf(_T("Failed to get active console session ID (%lu)\n"), GetLastError());
+        return ERROR_PROCESS_ABORTED;
+    }
+
+    HANDLE htoken = NULL;
+    if (!WTSQueryUserToken(sessionId, &htoken))
+    {
+        _tprintf(_T("WTSQueryUserToken failed (%lu)\n"), GetLastError());
+        return ERROR_PROCESS_ABORTED;
+    }
 
     // Obtenir le répertoire du service
     GetModuleFileName(NULL, szPath, MAX_PATH);
@@ -279,16 +293,18 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
+    si.lpDesktop = _T("winsta0\\default"); // Desktop interactif
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_HIDE; // Cacher la fenêtre
 
     ZeroMemory(&g_ProcessInfo, sizeof(g_ProcessInfo));
 
-    // Lancer winkey.exe
-    if (!CreateProcess(NULL, szPath, NULL, NULL, FALSE, 0, NULL, szDir, &si, &g_ProcessInfo))
+    // Lancer winkey.exe dans la session utilisateur
+    if (!CreateProcessAsUser(htoken, NULL, szPath, NULL, NULL, FALSE, 
+                           CREATE_NEW_CONSOLE, NULL, szDir, &si, &g_ProcessInfo))
     {
-        // Échec du lancement
-        return ERROR_PROCESS_ABORTED;
+        CloseHandle(htoken);
+        return GetLastError();
     }
 
     // Attendre que le service soit arrêté ou que le processus se ferme

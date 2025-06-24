@@ -6,12 +6,19 @@
 #define UNICODE
 #define _UNICODE
 
+#pragma warning(push)
+#pragma warning(disable: 4820)
 #include <windows.h>
+#include <wtsapi32.h>
 #include <tchar.h>
 #include <strsafe.h>
+#pragma warning(pop)
+
 #include <stdio.h>
 
 #pragma comment(lib, "Advapi32.lib")
+#pragma comment(lib, "Wtsapi32.lib")
+
 
 // Main service function
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv);
