@@ -34,7 +34,7 @@ fclean: clean
 	del /Q logs.txt 2>nul
 	del /Q *.dll 2>nul
 
-run: winkey.exe svc.exe
+run: all
 	@echo "Running Winkey and Svc..."
 	start svc.exe install
 	start svc.exe start
