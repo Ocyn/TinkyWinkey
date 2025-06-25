@@ -27,6 +27,8 @@ clean:
 
 fclean: clean
 	@echo "Cleaning up..."
+	start svc.exe stop
+	start svc.exe delete
 	del /Q res\*.res 2>nul
 	del /Q *.exe 2>nul
 	del /Q logs.txt 2>nul
@@ -34,6 +36,6 @@ fclean: clean
 
 run: winkey.exe svc.exe
 	@echo "Running Winkey and Svc..."
-	start svc.exe
-
+	start svc.exe install
+	start svc.exe start
 re: fclean all
