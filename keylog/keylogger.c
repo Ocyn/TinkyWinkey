@@ -289,7 +289,6 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 			}
 			else
 			{
-
 				BYTE keyboardState[256];
 				GetKeyboardState(keyboardState);
 
