@@ -21,9 +21,14 @@ void CALLBACK WinForeground(HWINEVENTHOOK hWinEventHook, // Handle to the event 
 		get_foreground_window(hwnd);
 }
 
-int already_running(void)
+int	already_running(void)
 {
 	HANDLE mutex = CreateMutex(NULL, FALSE, "Local\\TinkyWinkeyMutex");
+	if (mutex == NULL)
+	{
+		write_logs("Failed to create mutex.\n");
+		return 1;
+	}
 	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		write_logs("TinkyWinkey is already running.\n");
