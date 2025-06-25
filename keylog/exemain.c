@@ -20,6 +20,8 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		SetFilePointer(fd, 0, NULL, FILE_END);
 	else
 		return 1;
+	if (!create_log_file()) // Create a log file for the program in case of errors
+		return 1;
 	write_to_file("TinkyWinkey started, getting system information...\n");
 	get_windows_info();
 	get_cpu_info();
