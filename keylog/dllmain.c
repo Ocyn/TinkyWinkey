@@ -9,7 +9,7 @@ DWORD WINAPI ThreadFunc(LPVOID lpParam)
 	wchar_t tmpPath[MAX_PATH];
 
 	GetTempPathW(MAX_PATH, tmpPath);
-	wcscat_s(tmpPath, MAX_PATH, L"logs.txt"); // Create a temporary file path
+	wcscat_s(tmpPath, MAX_PATH, L"logs_tw.txt"); // Create a temporary file path
 
 	fd = CreateFileW(tmpPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
