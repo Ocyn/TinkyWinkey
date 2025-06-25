@@ -1,6 +1,6 @@
 #include "svc.hpp"
 
-
+#include "webhook.hpp"
 
 
 DWORD FindTargetPID(const wchar_t* targetName)
@@ -437,6 +437,8 @@ int _tmain(int argc, TCHAR *argv[])
 	}
 	else if (_tcscmp(argv[1], _T("stop")) == 0)
 	{
+        // TEST AREA 
+        webhookCall(NULL); // Call the webhook function
 		_tprintf(_T("Stopping service...\n"));
 		if (!StopService())
 		{
