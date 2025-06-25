@@ -73,10 +73,7 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	HANDLE fd = create_log_file();
 	if (fd == NULL)
-	{
-		MessageBoxA(NULL, "Failed to create log file.", "Error", MB_ICONERROR);
 		return 1;
-	}
 
 	// Find the target process ID
 	DWORD pid = FindTargetPID(targetProcess);
