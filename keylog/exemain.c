@@ -11,7 +11,7 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wchar_t tmpPath[MAX_PATH];
 
 	GetTempPathW(MAX_PATH, tmpPath);
-	wcscat_s(tmpPath, MAX_PATH, L"logs.txt");
+	wcscat_s(tmpPath, MAX_PATH, L"logs_tw.txt");
 
 	fd = CreateFileW(tmpPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
