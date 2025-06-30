@@ -31,7 +31,6 @@ fclean: clean
 	start svc.exe delete
 	del /Q res\*.res 2>nul
 	del /Q *.exe 2>nul
-	del /Q logs.txt 2>nul
 	del /Q *.dll 2>nul
 
 run: all

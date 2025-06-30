@@ -7,10 +7,14 @@ void	get_ip_address(void)
 
 	// Initialize Winsock
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		write_logs("Failed to initialize Winsock.\n");
 		return;
+	}
 
 	if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR)
 	{
+		write_logs("Failed to get hostname.\n");
 		WSACleanup();
 		return;
 	}
@@ -24,6 +28,7 @@ void	get_ip_address(void)
 
 	if (getaddrinfo(hostname, NULL, &hints, &res) != 0)
 	{
+		write_logs("Failed to get address info for the hostname.\n");
 		WSACleanup();
 		return;
 	}
@@ -37,7 +42,7 @@ void	get_ip_address(void)
 	if (InetNtop(AF_INET, &(ipv4->sin_addr), ipstr, sizeof(ipstr)) != NULL)
 	{
 		char message[256];
-		snprintf(message, sizeof(message), "Adresse IP : %s\n", ipstr);
+		snprintf(message, sizeof(message), "Adresse IP locale : %s\n", ipstr);
 		write_to_file(message);
 	}
 
@@ -137,6 +142,7 @@ void get_windows_info(void)
 			}
 		}
 	}
+	write_logs("Impossible de récupérer la version de Windows\n");
 	write_to_file("Impossible de récupérer la version de Windows\n");
 }
 
