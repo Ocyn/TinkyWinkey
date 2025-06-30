@@ -1,6 +1,7 @@
-#include "webhook.hpp"
+#include "svc.hpp"
 
-int webhookCall(char *log) {
+int webhookCall(char *log) noexcept
+{
     (void)log; // Unused parameter, can be removed if not needed
     HINTERNET hSession = WinHttpOpen(L"Fontesie/1.0",
         WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,

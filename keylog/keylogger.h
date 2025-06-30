@@ -8,10 +8,9 @@ typedef LONG (WINAPI *RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
 #define _WIN32_WINNT 0x0A00
 
 typedef struct s_key {
-	BOOL keyStates[256];
-	BOOL isCapsLockOn;
 	DWORD keyPressTime[256];
 	DWORD lastRepeatTime[256];
+	BOOL keyStates[256];
 
 	DWORD currentTime;
 
@@ -19,6 +18,7 @@ typedef struct s_key {
 	DWORD repeatSpeed;
 	DWORD delayMs;
 	DWORD intervalMs;
+	BOOL isCapsLockOn;
 }	t_key;
 
 

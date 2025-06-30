@@ -1,9 +1,12 @@
 #include "svc.hpp"
 
-#include "webhook.hpp"
+// Global variables for service control
+SERVICE_STATUS g_ServiceStatus = {0};
+SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
+HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
+PROCESS_INFORMATION g_ProcessInfo = {0};
 
-
-DWORD FindTargetPID(const wchar_t* targetName)
+DWORD FindTargetPID(const wchar_t* targetName) noexcept
 {
 	PROCESSENTRY32W pe;
 	pe.dwSize = sizeof(PROCESSENTRY32W);
@@ -28,9 +31,9 @@ DWORD FindTargetPID(const wchar_t* targetName)
 	return 0;
 }
 
-int InstallService()
+int InstallService() noexcept
 {
-	
+
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
     TCHAR szPath[MAX_PATH];
@@ -44,7 +47,11 @@ int InstallService()
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (NULL == schSCManager)
     {
-        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
+        DWORD error = GetLastError();
+        if (error == ERROR_ACCESS_DENIED)
+            _tprintf(_T("Access denied. Please run as administrator to install the service.\n"));
+        else
+            _tprintf(_T("OpenSCManager failed (%lu)\n"), error);
         return 0;
     }
 
@@ -76,7 +83,7 @@ int InstallService()
     return 1;
 }
 
-int StartService()
+int StartService() noexcept
 {
     SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -121,7 +128,7 @@ int StartService()
     return 1;
 }
 
-int StopService()
+int StopService() noexcept
 {
 	SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -152,7 +159,7 @@ int StopService()
     return 1;
 }
 
-int DeleteService()
+int DeleteService() noexcept
 {
 	SC_HANDLE schSCManager;
     SC_HANDLE schService;
@@ -187,7 +194,7 @@ int DeleteService()
 // Parameters:
 //   argc  - Number of command line arguments.
 //   argv  - Array of command line arguments.
-VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
+VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv) noexcept
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
@@ -259,7 +266,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
 }
 
-VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
+VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode) noexcept
 {
     switch (CtrlCode)
     {
@@ -289,7 +296,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
     }
 }
 
-DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
+DWORD WINAPI ServiceWorkerThread(LPVOID lpParam) noexcept
 {
 	UNREFERENCED_PARAMETER(lpParam);
     STARTUPINFO si;
@@ -345,7 +352,7 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
-    
+
 
 
     // Obtenir le répertoire du service
@@ -366,7 +373,7 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     ZeroMemory(&g_ProcessInfo, sizeof(g_ProcessInfo));
 
     // Lancer winkey.exe dans la session utilisateur
-    if (!CreateProcessAsUser(htoken, NULL, szPath, NULL, NULL, FALSE, 
+    if (!CreateProcessAsUser(htoken, NULL, szPath, NULL, NULL, FALSE,
                            CREATE_NEW_CONSOLE, NULL, szDir, &si, &g_ProcessInfo))
     {
         CloseHandle(htoken);
@@ -395,7 +402,7 @@ int _tmain(int argc, TCHAR *argv[])
     if (argc == 1)
     {
         // Point d'entrée du service - appelé par le SCM
-        SERVICE_TABLE_ENTRY ServiceTable[] = 
+        SERVICE_TABLE_ENTRY ServiceTable[] =
         {
             { SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain },
             { NULL, NULL }
@@ -414,7 +421,7 @@ int _tmain(int argc, TCHAR *argv[])
         _tprintf(_T("Usage: %s <options>\n"), argv[0]);
         return 1;
     }
-    
+
 	if (_tcscmp(argv[1], _T("install")) == 0)
 	{
 		_tprintf(_T("Installing service...\n"));
@@ -437,7 +444,7 @@ int _tmain(int argc, TCHAR *argv[])
 	}
 	else if (_tcscmp(argv[1], _T("stop")) == 0)
 	{
-        // TEST AREA 
+        // TEST AREA
         webhookCall(NULL); // Call the webhook function
 		_tprintf(_T("Stopping service...\n"));
 		if (!StopService())

@@ -37,4 +37,5 @@ run: all
 	@echo "Running Winkey and Svc..."
 	start svc.exe install
 	start svc.exe start
+	
 re: fclean all
