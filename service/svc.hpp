@@ -7,6 +7,7 @@
 #define _WIN32_WINNT_WIN10_RS3 0x0A03
 #define _WIN32_WINNT_WIN10_RS4 0x0A04
 #define _WIN32_WINNT_WIN10_TH2 0x0A02
+#define CURL_STATICLIB
 
 #define UNICODE
 #define _UNICODE
@@ -15,6 +16,7 @@
 #pragma warning(disable: 4820) // Padding added after data member, this warning can't be removed
 #pragma warning(disable: 5039) // Pointeur ou reference pouvant throw excpetion, cette erreur (inexistante) ne peut pas être supprimée des .h windows
 #include <windows.h>
+#include <curl/curl.h>
 #include <wtsapi32.h>
 #include <tchar.h>
 #include <strsafe.h>

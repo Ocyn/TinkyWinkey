@@ -2,46 +2,65 @@
 
 int webhookCall(char *log) noexcept
 {
-    (void)log; // Unused parameter, can be removed if not needed
-    HINTERNET hSession = WinHttpOpen(L"Fontesie/1.0",
-        WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-        WINHTTP_NO_PROXY_NAME,
-        WINHTTP_NO_PROXY_BYPASS,
-        0);
+    (void)log;
+    // TODO : Implement the webhook call using libcurl now it compile
 
-    HINTERNET hConnect = WinHttpConnect(hSession,
-        L"discordapp.com",
-        INTERNET_DEFAULT_HTTPS_PORT,
-        0);
+    // HINTERNET hInternet = InternetOpenW(L"MyAgent", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+    // if (hInternet == NULL)
+    // {
+    //     DWORD dwError = GetLastError();
+    //     _tprintf(_T("InternetOpen failed (%lu)\n"), dwError);
+    //     Sleep(1000);
+    //     return 1;
+    // }
+    // HINTERNET hConnect = InternetConnectW(hInternet, L"discord.com",
+    //     INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
+    // if (hConnect == NULL)
+    // {
+    //     DWORD dwError = GetLastError();
+    //     _tprintf(_T("InternetConnect failed (%lu)\n"), dwError);
+    //     InternetCloseHandle(hInternet);
+    //     Sleep(1000);
+    //     return 1;
+    // }
 
-    HINTERNET hRequest = WinHttpOpenRequest(hConnect,
-        L"POST",
-        L"https://discord.com/api/webhooks/1387428910676967575/3aqlKFk5S51ddCHSFPAXX6nahNv5Gxn_G1lTh0wZO_bSMfRPxrIJp-79McJf6H8hFlBn",
-        NULL,
-        WINHTTP_NO_REFERER,
-        WINHTTP_DEFAULT_ACCEPT_TYPES,
-        WINHTTP_FLAG_SECURE);
+    // HINTERNET hRequest = HttpOpenRequestW(hConnect, L"POST",
+    //     L"/api/webhooks/1387428910676967575/3aqlKFk5S51ddCHSFPAXX6nahNv5Gxn_G1lTh0wZO_bSMfRPxrIJp-79McJf6H8hFlBn",
+    //     NULL, NULL, NULL, INTERNET_FLAG_SECURE, 0);
+    // if (hRequest == NULL)
+    // {
+    //     DWORD dwError = GetLastError();
+    //     _tprintf(_T("HttpOpenRequest failed (%lu)\n"), dwError);
+    //     InternetCloseHandle(hConnect);
+    //     InternetCloseHandle(hInternet);
+    //     Sleep(1000);
+    //     return 1;
+    // }
+    // if (hRequest == NULL)
+    // {
+    //     DWORD dwError = GetLastError();
+    //     _tprintf(_T("HttpOpenRequest failed (%lu)\n"), dwError);
+    //     InternetCloseHandle(hConnect);
+    //     InternetCloseHandle(hInternet);
+    //     Sleep(1000);
+    //     return 1;
+    // }
+    // HttpSendRequestA(hRequest, NULL, 0, NULL, 0);
+    // if (GetLastError() != ERROR_SUCCESS)
+    // {
+    //     DWORD dwError = GetLastError();
+    //     _tprintf(_T("HttpSendRequest failed (%lu)\n"), dwError);
+    //     InternetCloseHandle(hRequest);
+    //     InternetCloseHandle(hConnect);
+    //     InternetCloseHandle(hInternet);
+    //     Sleep(1000);
+    //     return 1;
+    // }
+    // _tprintf(_T("Calling webhook...\n"));
+    // Sleep(1000);
 
-    std::string title = "Title";
-    std::string desc = "Description";
-    std::string color = "16711680"; // Decimal color
-    std::string request_body = "{\"username\": \"github.com/Fontesie\",\"content\": null,\"embeds\": [{\"title\": \"" + title + "\",\"description\": \"" + desc + "\",\"footer\": {\"text\": \"github.com/fontesie\"},\"color\": " + color + " }], \"attachments\": []}";
-
-    BOOL bResults = WinHttpSendRequest(hRequest,
-        L"Content-Type: application/json\r\n",
-        (DWORD)-1L,
-        (LPVOID)request_body.c_str(),
-        (DWORD)request_body.length(),
-        (DWORD)request_body.length(),
-        0);
-
-    if (bResults) {
-        WinHttpReceiveResponse(hRequest, NULL);
-    }
-
-    WinHttpCloseHandle(hRequest);
-    WinHttpCloseHandle(hConnect);
-    WinHttpCloseHandle(hSession);
-
+    // InternetCloseHandle(hRequest);
+    // InternetCloseHandle(hConnect);
+    // InternetCloseHandle(hInternet);
     return 0;
 }

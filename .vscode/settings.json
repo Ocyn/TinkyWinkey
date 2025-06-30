@@ -11,6 +11,7 @@
 "terminal.integrated.defaultProfile.windows": "Dev CMD with vcvarsall",
 "files.associations": {
   "psapi.h": "c",
-  "keylogger.h": "c"
+  "keylogger.h": "c",
+  "xstring": "cpp"
 }
 }
