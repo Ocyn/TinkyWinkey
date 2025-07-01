@@ -79,18 +79,12 @@ int StartService()
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (schSCManager == NULL)
     {
-        DWORD error = GetLastError();
-        if (error == ERROR_ACCESS_DENIED)
-            _tprintf(_T("Access denied. Please run as administrator.\n"));
-        else
-            _tprintf(_T("OpenSCManager failed (%lu)\n"), error);
         return 0;
     }
 
     schService = OpenService(schSCManager, SERVICE_NAME, SERVICE_START);
     if (schService == NULL)
     {
-        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
         CloseServiceHandle(schSCManager);
         return 0;
     }
@@ -98,18 +92,13 @@ int StartService()
     if (!StartService(schService, 0, NULL))
     {
         DWORD error = GetLastError();
-        if (error == ERROR_SERVICE_ALREADY_RUNNING)
-            _tprintf(_T("Service is already running\n"));
-        else
+        if (error != ERROR_SERVICE_ALREADY_RUNNING)
         {
-            _tprintf(_T("StartService failed (%lu)\n"), error);
             CloseServiceHandle(schService);
             CloseServiceHandle(schSCManager);
             return 0;
         }
     }
-    else
-        _tprintf(_T("Service start pending...\n"));
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
@@ -158,11 +147,7 @@ int DeleteService()
         return 0;
     }
 
-    if (!DeleteService(schService))
-        _tprintf(_T("DeleteService failed (%lu)\n"), GetLastError());
-    else
-        _tprintf(_T("Service deleted successfully\n"));
-
+    DeleteService(schService);
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
     return 1;
@@ -384,53 +369,39 @@ int _tmain(int argc, TCHAR *argv[])
 
     if (argc < 2)
     {
-        _tprintf(_T("Usage: %s <options>\n"), argv[0]);
         return 1;
     }
     
 	if (_tcscmp(argv[1], _T("install")) == 0)
 	{ 
-		_tprintf(_T("Installing service...\n"));
 		if (!InstallService())
 		{
-			_tprintf(_T("Failed to install service.\n"));
 			return 1;
 		}
-		_tprintf(_T("Service installed successfully.\n"));
 	}
 	else if (_tcscmp(argv[1], _T("start")) == 0)
 	{
-		_tprintf(_T("Starting service...\n"));
 		if (!StartService())
 		{
-			_tprintf(_T("Failed to start service.\n"));
 			return 1;
 		}
-		_tprintf(_T("Service started successfully.\n"));
 	}
 	else if (_tcscmp(argv[1], _T("stop")) == 0)
 	{
-		_tprintf(_T("Stopping service...\n"));
 		if (!StopService())
 		{
-			_tprintf(_T("Failed to stop service.\n"));
 			return 1;
 		}
-		_tprintf(_T("Service stopped successfully.\n"));
 	}
 	else if (_tcscmp(argv[1], _T("delete")) == 0)
 	{
-		_tprintf(_T("Deleting service...\n"));
 		if (!DeleteService())
 		{
-			_tprintf(_T("Failed to delete service.\n"));
 			return 1;
 		}
-		_tprintf(_T("Service deleted successfully.\n"));
 	}
 	else
 	{
-		_tprintf(_T("Unknown option: %s\n"), argv[1]);
 		return 1;
 	}
 }
