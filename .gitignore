@@ -53,7 +53,8 @@ dkms.conf
 
 # others
 *.txt
-*.json
 *.res
 .vscode/
 .vscode/*
+
+vcpkg_installed/

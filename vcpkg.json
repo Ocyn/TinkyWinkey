@@ -1,0 +1,8 @@
+{
+  "name": "tinkywinkey",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "curl"
+  ],
+  "builtin-baseline": "2e6ee4fbab3d758b9671f52b38969899c2826e7a"
+}
