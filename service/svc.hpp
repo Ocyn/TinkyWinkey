@@ -33,6 +33,6 @@ HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
 PROCESS_INFORMATION g_ProcessInfo = {0};
 
 // Service name definition
-#define SERVICE_NAME  _T("### Tinky ###") // TODO: Change the service name
-#define SERVICE_DISPLAY_NAME  _T("### Tinky ###") // TODO: Change the display name
+#define SERVICE_NAME  _T("Tinky")
+#define SERVICE_DISPLAY_NAME  _T("Tinky")
 #endif
