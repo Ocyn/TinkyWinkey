@@ -9,6 +9,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4820)
 #include <windows.h>
+#include <shellapi.h>
 #include <wtsapi32.h>
 #include <tchar.h>
 #include <strsafe.h>
