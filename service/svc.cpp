@@ -115,15 +115,22 @@ int StopService()
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (schSCManager == NULL)
     {
+        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
         return 0;
     }
 
     schService = OpenService(schSCManager, SERVICE_NAME, SERVICE_STOP | SERVICE_QUERY_STATUS);
     if (schService == NULL)
     {
+        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
         CloseServiceHandle(schSCManager);
         return 0;
     }
+
+    if (!ControlService(schService, SERVICE_CONTROL_STOP, &ssStatus))
+        _tprintf(_T("ControlService failed (%lu)\n"), GetLastError());
+    else
+        _tprintf(_T("Service stopped successfully\n"));
 
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
@@ -140,17 +147,23 @@ int DeleteService()
     schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (schSCManager == NULL)
     {
+        _tprintf(_T("OpenSCManager failed (%lu)\n"), GetLastError());
         return 0;
     }
 
     schService = OpenService(schSCManager, SERVICE_NAME, DELETE);
     if (schService == NULL)
     {
+        _tprintf(_T("OpenService failed (%lu)\n"), GetLastError());
         CloseServiceHandle(schSCManager);
         return 0;
     }
 
-    DeleteService(schService);
+    if (!DeleteService(schService))
+        _tprintf(_T("DeleteService failed (%lu)\n"), GetLastError());
+    else
+        _tprintf(_T("Service deleted successfully\n"));
+
     CloseServiceHandle(schService);
     CloseServiceHandle(schSCManager);
     return 1;
@@ -364,10 +377,16 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
     return ERROR_SUCCESS;
 }
 
-int _tmain(int argc, TCHAR *argv[])
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
+    (void)hInstance;
+    (void)hPrevInstance;
+    (void)nCmdShow;
+    (void)lpCmdLine;
+    int nArgs = 0;
+    LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &nArgs);
     // If no arguments, the SCM is starting the service
-    if (argc == 1)
+    if (nArgs == 0 || nArgs == 1)
     {
         // Service entry point - called by the SCM
         SERVICE_TABLE_ENTRY ServiceTable[] = 
@@ -384,7 +403,7 @@ int _tmain(int argc, TCHAR *argv[])
         return 0;
     }
 
-    if (argc < 2)
+    if (nArgs < 2)
     {
         return 1;
     }
@@ -421,4 +440,5 @@ int _tmain(int argc, TCHAR *argv[])
 	{
 		return 1;
 	}
+    return 0;
 }
