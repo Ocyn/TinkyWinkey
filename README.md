@@ -1,5 +1,6 @@
 # TinkyWinkey
 ### Yet Another Windows 10 keylogger
+# 42 School Project
 <img src=".readme_utils\banner.jpg" alt="Title banner" width="1024"/>
 
 ## Table of Contents
