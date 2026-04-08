@@ -1,5 +1,18 @@
 # TinkyWinkey
-A 42 School Project
+**LEGAL AND ETHICAL DISCLAIMER**
+
+This project, named TinkyWinkey, is developed as part of a school project at [42](https://42lyon.fr/). Its sole purpose is strictly **educational and demonstrative**.
+
+**PROHIBITED AND ILLEGAL USE:**
+Any use of this code for malicious purposes, such as unauthorized surveillance, espionage, or any activity contrary to the law, is strictly prohibited and will be prosecuted.
+
+**CONTEXT AND DECLARATION:**
+We wish to emphasize that this project was not developed as part of any criminal activity. However, given its nature, we are aware of ethical concerns.
+
+**NOTE REGARDING EXTERNAL INCIDENTS:**
+In reference to recent public discussions, this project is not linked to any illegal activities. The articles discusses isolated developments; this code is an academic work.
+
+By downloading or using this code, you agree to abide by these terms.
 # Yet Another Windows 10 keylogger
 <img src=".readme_utils\banner.jpg" alt="Title banner" width="1024"/>
 
