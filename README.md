@@ -1,4 +1,11 @@
 # TinkyWinkey
+<table>
+<tr>
+<td width="256">
+<img src=".readme_utils/disclaimer.jpg" alt="disclaimer" width="256"/>
+</td>
+<td>
+
 **LEGAL AND ETHICAL DISCLAIMER**
 
 This project, named TinkyWinkey, is developed as part of a school project at [42](https://42lyon.fr/). Its sole purpose is strictly **educational and demonstrative**.
@@ -13,6 +20,11 @@ We wish to emphasize that this project was not developed as part of any criminal
 In reference to recent public discussions, this project is not linked to any illegal activities. The articles discusses isolated developments; this code is an academic work.
 
 By downloading or using this code, you agree to abide by these terms.
+
+</td>
+</tr>
+</table>
+
 # Yet Another Windows 10 keylogger
 <img src=".readme_utils\banner.jpg" alt="Title banner" width="1024"/>
 
